@@ -1,82 +1,47 @@
 version: 2.1
+
+default_image: &default_image
+    docker:
+    - image: circleci/node:13.8.0
+
 jobs:
   build:
-    environment:
-      # environment
-      CC_TEST_REPORTER_ID: 2bb20e058832f62485904001a0f1f6052dbc95561a97e7a9a6b060434b573a9d
-    docker:
-      - image: circleci/node:13.8.0
-    working_directory: ~/app
+    <<: *default_image
     steps:
       - checkout
+
       - restore_cache:
-          keys:
-            - v1-dependencies={{ checksum "package.json" }}
-            - v1-dependencies-
+          keys: [builds]
+
       - run:
-          name: install dependencies
-          command:
+          name: install_dependencies
+          command: |
             npm install
 
       - run:
-          name: clone and use latest data-modela from repository
-          command:
-            pwd;
-            cd /;
-            sudo git clone https://github.com/tutugodfrey/modela;
-            cd modela;
-            sudo npm install;
-            sudo npm test;
-            sudo npm link;
-            cd ~/app;
-            sudo npm link data-modela;
-          # - npm install git+https://github.com/tutugodfrey/modela.git#0.0.9
-      # - run:
-      #     name: install dependencies
-      #     command:
-      #       npm install git+https://github.com/tutugodfrey/modela.git
-      # - run:
-      #     name: install java
-      #     command:
-      #       sudo apt update && sudo apt-get upgrade && sudo apt install apt-get install default-jdk;
-      # - run:
-      #     name: Download Selenium
-      #     command: curl -O http://selenium-release.storage.googleapis.com/3.5/selenium-server-standalone-3.5.3.jar
-      # - run:
-      #     name: Start Selenium
-      #     command: java -jar selenium-server-standalone-3.5.3.jar -log test-reports/selenium.log
-      #     background: true
-      - run:
-          name: Setup Code Climate test-reporter
-          command:
-          # download test reporter as a static binary
-            curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter;
-            chmod +x ./cc-test-reporter;
-
-      - run:
-          name: Run tests and generate code coverage report with nyc
-          command:
-            ./cc-test-reporter before-build
-      - run:
-          name: Run Test
+          name: Run build
           command: |
-            npm run coverage
-      - run:
-          name: Send coverage report
-          command:
-            ./cc-test-reporter  after-build --coverage-input-type lcov
+            npm run build
 
-  build_backend_image:
-    steps:
-      - run:
-          name: source function
-          command: |
-            . ./docker-helper.sh
-            build-image-be
+      - save_cache:
+          paths: [./]
+          key: builds
       
+  test:
+    <<: *default_image
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys: [builds]
+
       - run:
-          name: push image to docker hub
-          command: |
-            . /docker-helper.sh
-            push-image-fe
-  build_frontend_image:
+          name: Run test
+          command: npm test
+
+workflows:
+  default:
+    jobs:
+      - build
+      - test:
+          requires: [build]

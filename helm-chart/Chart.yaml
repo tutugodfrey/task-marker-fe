@@ -1,16 +1,12 @@
 apiVersion: v1
-name: todo-er-app
-description: Deployment configuration for todo-er app
+name: todoapp-fe
+description: Chart for todo-er frontend
 keywords:
-  - Node.js
+  - React
+  - Nodejs
   - Kubernetes
   - Docker
-  - Prometheus
-  - Grafana
-  - Todos
 version: 1.1
 maintainers:
   - name: Godfrey Tutu
     email: godfrey_tutu@yahoo.com
-
-

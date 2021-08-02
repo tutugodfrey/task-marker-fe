@@ -4,7 +4,7 @@ metadata:
   name: {{ .Values.deployment.name }}
   namespace: {{ .Values.namespace.name }}
   labels:
-    app: todoapp-fe
+    app: {{ .Values.selector.app }}
 spec:
   replicas: {{ .Values.deployment.replicaCount }}
   selector:
@@ -20,11 +20,11 @@ spec:
         image: {{ .Values.container.image }}:{{ .Values.container.tag }}
         resources:
           requests:
-            cpu: 100m
-            memory: 100Mi
+            cpu: {{ .Values.resources.requests.cpu }}
+            memory: {{ .Values.resources.requests.memory }}
           limits:
-            cpu: 200m
-            memory: 200Mi
+            cpu: {{ .Values.resources.limits.cpu }}
+            memory: {{ .Values.resources.limits.memory}}
         ports:
         - containerPort: {{ .Values.container.containerPort }}
         livenessProbe:
@@ -41,8 +41,8 @@ spec:
         image: busybox:latest
         command: ["sh", "-c", "while true; do cat /var/log/nginx/access.log /var/log/nginx/error.log; sleep 30; done"]
         volumeMounts:
-        - name: shared-logs
-          mountPath: /var/log/nginx     
+        - name: {{ .Values.volumes.shared-logs.name }}
+          mountPath: {{ .Values.volumes.mountPath }}    
       volumes:
-      - name: shared-logs
+      - name: {{ .Values.volumes.shared-logs.name }}
         emptyDir: {}

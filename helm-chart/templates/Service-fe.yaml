@@ -4,7 +4,7 @@ metadata:
   name: {{ .Values.service.name }}
   namespace: {{ .Values.namespace.name }}
   labels:
-    app: todoapp-fe
+    app: {{ .Values.selector.app }}
 spec:
   selector:
     app: {{ .Values.selector.app }}

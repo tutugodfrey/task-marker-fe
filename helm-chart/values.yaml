@@ -1,15 +1,34 @@
 namespace:
   name: dev
 
-frondendDeploy:
-  image:
-    repository:
-    tag:
+deployment:
+  name: todoapp-fe-deployment
   replicaCount: 1
+   
+container:
+  name: todoapp-fe-container
+  image: tutug/todoapp-fe
+  tag: latest
+  containerPort: 80
 
-backendDeploy:
-  image:
-    repository: 
-    tag:
-  replicaCount: 1
+selector:
+  app: todoapp-fe
 
+service:
+  name: todoapp-fe-service
+  port: 80
+  targetPort: 80
+  type: LoadBalancer
+
+resources:
+  requests:
+    cpu: 100mi
+    memory: 100Mi
+  limits:
+    cpu: 200m
+    memory: 200Mi
+
+volumes:
+  shared-logs:
+    name: shared-logs
+    mountPath: /var/log/nginx

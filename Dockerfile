@@ -28,3 +28,5 @@ COPY --from=build /app/public /usr/share/nginx/html/public/
 COPY --from=build /app/public/index.html /usr/share/nginx/html/ 
 COPY --from=build /app/public/bundle.js /usr/share/nginx/html/
 COPY --from=build /app/nginx.conf /etc/nginx/nginx.conf
+
+CMD ["nginx", "-g", "daemon off;"]

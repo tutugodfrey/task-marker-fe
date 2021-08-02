@@ -74,5 +74,16 @@ After sourcing the file, the following functions are exposed
 
 When any of the command run, you will be able to see exactly what is executed. You can copy and modify it if you desire to.
 
+To enable traffic to return to the nginx server, the image is build with the following command
+
+`docker build -t tutug/task-marker-fe:latest --build-arg API_URL=/api .`
+
+or using the docker-helper script
+
+`build_image_fe /api`
+
+The nginx server will  be configure to proxy the request to the backend server
+
+
 ## Author
 Tutu Godfrey <godfrey_tutu@yahoo.com>

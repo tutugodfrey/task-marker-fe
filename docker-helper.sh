@@ -1,7 +1,8 @@
 #! /bin/bash
 
-IMAGE_NAME_FE="tutug/todoapp-fe"
-CONTAINER_NAME_FE=todo-container-fe
+IMAGE_NAME_FE="tutug/task-marker-fe"
+CONTAINER_NAME_FE=task-marker-container-fe
+PORT_FE=80
 API_URL="http://localhost:$PORT_BE/api"
 
 function docker_deploy_help() {
@@ -38,10 +39,10 @@ function build_image_fe() {
 
   if [[ $# == 2 ]]; then
     API_URL=$1;
-    IMAGE_NAME_FE=$2
+    IMAGE_NAME_FE=$1
   fi
 
-  command="docker build  -t $IMAGE_NAME_FE:latest --build-arg API_URL=$API_URL -f dockerfile-frontend .";
+  command="docker build  -t $IMAGE_NAME_FE:latest --build-arg API_URL=$API_URL  .";
   echo Executing: $command;
   $command
 }
@@ -54,40 +55,40 @@ function run_container_fe () {
 
   if [[ $# == 2 ]]; then
     PORT_MAP=$1
-    CONTAINER_NAME_FE=$2
+    CONTAINER_NAME_FE=$1
   fi
 
   # command="docker run -d --name $CONTAINER_NAME_FE -p $PORT_MAP:$PORT_FE $IMAGE_NAME_FE";
-  command="docker run -d --name $CONTAINER_NAME_FE -p $PORT_MAP:$PORT_FE --link todoapp-container-be:todoapp-container-be $IMAGE_NAME_FE";
+  command="docker run -d --name $CONTAINER_NAME_FE -p $PORT_MAP:$PORT_FE --link task-marker-container-be:task-marker-container-be $IMAGE_NAME_FE";
   echo Executing: $command;
   $command
 }
 
 
 function push_image() {
-  command="docker push $IMAGE_NAME:latest";
+  command="docker push $IMAGE_NAME_FE:latest";
   echo Executing: $command;
   $command
 }
 
 function delete_image () {
-  command="docker rmi $IMAGE_NAME";
+  command="docker rmi $IMAGE_NAME_FE";
   echo Executing: $command;
   $command
 }
 
 function delete_container() {
   # Provide the -f flag to stop and delete container
-  if [[ $2 == '-f' ]]; then
-    command="docker container stop $CONTAINER_NAME";
+  if [[ $1 == '-f' ]]; then
+    command="docker container stop $CONTAINER_NAME_FE";
     echo Executing: $command;
     $command
 
-    command="docker container rm $CONTAINER_NAME";
+    command="docker container rm $CONTAINER_NAME_FE";
     echo Executing: $command;
     $command
   else
-    command="docker container rm $CONTAINER_NAME";
+    command="docker container rm $CONTAINER_NAME_FE";
     echo Executing: $command;
     $command
   fi

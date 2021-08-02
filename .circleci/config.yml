@@ -4,6 +4,13 @@ default_image: &default_image
     docker:
     - image: circleci/node:13.8.0
 
+docker_image: &docker_image
+  docker:
+  - image: circleci/golang:1.15
+    auth:
+      username: ${DOCKER_USER}
+      password: ${DOCKER_HUB_PASS}
+
 jobs:
   build:
     <<: *default_image
@@ -39,9 +46,27 @@ jobs:
           name: Run test
           command: npm test
 
+  build_and_push_docker_image:
+    <<: *docker_image
+    steps:
+      - checkout
+
+      - setup_remote_docker:
+          docker_layer_caching: false
+
+      - run:
+          name: Build docker image, tag with circleci build num
+          command: |
+            echo $DOCKER_HUB_PASS | docker login -u $DOCKER_USER --password-stdin
+            . ./docker-helper.sh
+            build_image_fe /api ${CIRCLE_BUILD_NUM}
+            push_image ${CIRCLE_BUILD_NUM}
+
 workflows:
   default:
     jobs:
       - build
       - test:
           requires: [build]
+      - build_and_push_docker_image:
+          requires: [test]

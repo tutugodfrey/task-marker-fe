@@ -8,7 +8,7 @@ deployment:
 container:
   name: todoapp-fe-container
   image: tutug/todoapp-fe
-  tag: latest
+  tag: 68
   containerPort: 80
 
 selector:

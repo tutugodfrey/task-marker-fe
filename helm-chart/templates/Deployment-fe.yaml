@@ -35,7 +35,7 @@ spec:
           periodSeconds: 5
         imagePullPolicy: IfNotPresent
         volumeMounts:
-        - name: shared-logs
+        - name: {{ .Values.volumes.shared_logs.name }}
           mountPath: /var/log/nginx
       - name: log-container
         image: busybox:latest
@@ -44,5 +44,5 @@ spec:
         - name: {{ .Values.volumes.shared_logs.name }}
           mountPath: {{ .Values.volumes.mountPath }}    
       volumes:
-      - name: {{ .Values.volumes.shared-logs.name }}
+      - name: {{ .Values.volumes.shared_logs.name }}
         emptyDir: {}

@@ -8,7 +8,7 @@ deployment:
 container:
   name: todoapp-fe-container
   image: tutug/todoapp-fe
-  tag: 68
+  tag: 77
   containerPort: 80
 
 selector:
@@ -30,6 +30,6 @@ resources:
 
 volumes:
   shared_logs:
-    name: shared-logs
+    name: shared_logs
     mountPath: /var/log/nginx
 

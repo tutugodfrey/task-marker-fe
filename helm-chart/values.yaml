@@ -30,6 +30,6 @@ resources:
 
 volumes:
   shared_logs:
-    name: shared_logs
+    name: shared-logs
     mountPath: /var/log/nginx
 

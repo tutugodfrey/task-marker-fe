@@ -33,7 +33,7 @@ spec:
             path: /
           initialDelaySeconds: 10
           periodSeconds: 5
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         volumeMounts:
         - name: {{ .Values.volumes.shared_logs.name }}
           mountPath: {{ .Values.volumes.shared_logs.mountPath }} 

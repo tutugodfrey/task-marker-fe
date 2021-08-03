@@ -84,6 +84,7 @@ or using the docker-helper script
 
 The nginx server will  be configure to proxy the request to the backend server
 
+Adding commit to test argo image updater
 
 ## Author
 Tutu Godfrey <godfrey_tutu@yahoo.com>

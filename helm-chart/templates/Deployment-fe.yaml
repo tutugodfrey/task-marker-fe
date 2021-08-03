@@ -36,13 +36,13 @@ spec:
         imagePullPolicy: IfNotPresent
         volumeMounts:
         - name: {{ .Values.volumes.shared_logs.name }}
-          mountPath: /var/log/nginx
+          mountPath: {{ .Values.volumes.shared_logs.mountPath }} 
       - name: log-container
         image: busybox:latest
         command: ["sh", "-c", "while true; do cat /var/log/nginx/access.log /var/log/nginx/error.log; sleep 30; done"]
         volumeMounts:
         - name: {{ .Values.volumes.shared_logs.name }}
-          mountPath: {{ .Values.volumes.mountPath }}    
+          mountPath: {{ .Values.volumes.shared_logs.mountPath }}    
       volumes:
       - name: {{ .Values.volumes.shared_logs.name }}
         emptyDir: {}

@@ -29,6 +29,7 @@ resources:
     memory: 200Mi
 
 volumes:
-  shared-logs:
+  shared_logs:
     name: shared-logs
     mountPath: /var/log/nginx
+

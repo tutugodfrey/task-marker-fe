@@ -41,7 +41,7 @@ spec:
         image: busybox:latest
         command: ["sh", "-c", "while true; do cat /var/log/nginx/access.log /var/log/nginx/error.log; sleep 30; done"]
         volumeMounts:
-        - name: {{ .Values.volumes.shared-logs.name }}
+        - name: {{ .Values.volumes.shared_logs.name }}
           mountPath: {{ .Values.volumes.mountPath }}    
       volumes:
       - name: {{ .Values.volumes.shared-logs.name }}

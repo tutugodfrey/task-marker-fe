@@ -1,6 +1,7 @@
 #! /bin/bash
 
 IMAGE_NAME_FE="tutug/task-marker-fe"
+TAG=latest
 CONTAINER_NAME_FE=task-marker-container-fe
 PORT_FE=80
 API_URL="http://localhost:$PORT_BE/api"
@@ -39,10 +40,16 @@ function build_image_fe() {
 
   if [[ $# == 2 ]]; then
     API_URL=$1;
-    IMAGE_NAME_FE=$1
+    TAG=$2
   fi
 
-  command="docker build  -t $IMAGE_NAME_FE:latest --build-arg API_URL=$API_URL  .";
+  if [[ $# == 3 ]]; then
+    API_URL=$1;
+    TAG=$2
+    IMAGE_NAME_FE=$3
+  fi
+
+  command="docker build  -t $IMAGE_NAME_FE:$TAG --build-arg API_URL=$API_URL  .";
   echo Executing: $command;
   $command
 }
@@ -66,7 +73,11 @@ function run_container_fe () {
 
 
 function push_image() {
-  command="docker push $IMAGE_NAME_FE:latest";
+  if [[ ! -z $1 ]]; then
+    TAG=$1
+  fi
+
+  command="docker push $IMAGE_NAME_FE:$TAG";
   echo Executing: $command;
   $command
 }

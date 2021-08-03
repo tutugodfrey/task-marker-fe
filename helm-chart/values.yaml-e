@@ -2,20 +2,20 @@ namespace:
   name: dev
 
 deployment:
-  name: task-marker-fe-deployment
+  name: todoapp-fe-deployment
   replicaCount: 1
    
 container:
-  name: task-marker-fe-container
+  name: todoapp-fe-container
   image: tutug/task-marker-fe
-  tag: 104
+  tag: 77
   containerPort: 80
 
 selector:
-  app: task-marker-fe
+  app: todoapp-fe
 
 service:
-  name: task-marker-fe-service
+  name: todoapp-fe-service
   port: 80
   targetPort: 80
   type: LoadBalancer

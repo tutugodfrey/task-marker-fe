@@ -66,7 +66,7 @@ function run_container_fe () {
   fi
 
   # command="docker run -d --name $CONTAINER_NAME_FE -p $PORT_MAP:$PORT_FE $IMAGE_NAME_FE";
-  command="docker run -d --name $CONTAINER_NAME_FE -p $PORT_MAP:$PORT_FE --link task-marker-container-be:task-marker-container-be $IMAGE_NAME_FE";
+  command="docker run -d --name $CONTAINER_NAME_FE -p $PORT_MAP:$PORT_FE --link task-marker-container-be:task-marker-be-service $IMAGE_NAME_FE";
   echo Executing: $command;
   $command
 }

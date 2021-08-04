@@ -1,2 +1,5 @@
 namespace:
-  name: prod
+  name: prod-fe
+
+container:
+  tag: prod-104

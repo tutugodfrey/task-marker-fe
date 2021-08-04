@@ -1,0 +1,5 @@
+namespace:
+  name: staging-fe
+
+container:
+  tag: staging-104

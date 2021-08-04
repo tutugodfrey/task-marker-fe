@@ -12,6 +12,44 @@ docker_image: &docker_image
       password: ${DOCKER_HUB_PASS}
 
 jobs:
+  configure_env:
+    <<: *default_image
+    steps:
+      - checkout
+    
+      - run:
+          name: Get bakcend service endpoint
+          command: |
+            BACKEND_SERVICE_ENDPOINT=${BACKEND_SERVICE}
+            ENVIRONMENT=dev
+            if [[ $CIRCLE_BRANCH == master ]]; then
+              BACKEND_SERVICE_ENDPOINT=${BACKEND_SERVICE_PROD}
+              ENVIRONMENT=prod
+            fi
+
+            if [[ $CIRCLE_BRANCH == develop ]]; then
+              BACKEND_SERVICE_ENDPOINT=${BACKEND_SERVICE_STAGING}
+              ENVIRONMENT=staging
+            fi
+
+            if [[ $CIRCLE_BRANCH == test ]]; then
+              BACKEND_SERVICE_ENDPOINT=${BACKEND_SERVICE_TEST}
+              ENVIRONMENT=test
+            fi
+
+            echo BACKEND_SERVICE_ENDPOINT=${BACKEND_SERVICE_ENDPOINT} >> ~/.env;
+            echo ENVIRONMENT=${ENVIRONMENT} >> ~/.env;
+
+      - run:
+          name: Check env vars
+          command: |
+            cat ~/.env
+
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - .env
+
   build:
     <<: *default_image
     steps:
@@ -51,21 +89,33 @@ jobs:
     steps:
       - checkout
 
+      - attach_workspace:
+          at: ~/
+
       - setup_remote_docker:
           docker_layer_caching: false
 
       - run:
+          name: Update backend service endpoint
+          command: |
+            export "$(grep BACKEND_SERVICE_ENDPOINT ~/.env)"
+            sed -i "s|BACKEND_SERVICE_ENDPOINT|${BACKEND_SERVICE_ENDPOINT}|" nginx.conf
+
+      - run:
           name: Build docker image, tag with circleci build num
           command: |
+            export "$(grep ENVIRONMENT ~/.env)"
             echo $DOCKER_HUB_PASS | docker login -u $DOCKER_USER --password-stdin
             . ./docker-helper.sh
-            build_image_fe /api ${CIRCLE_BUILD_NUM}
-            push_image ${CIRCLE_BUILD_NUM}
+            build_image_fe /api ${ENVIRONMENT}-${CIRCLE_BUILD_NUM}
+            push_image ${ENVIRONMENT}-${CIRCLE_BUILD_NUM}
 
 workflows:
   default:
     jobs:
-      - build
+      - configure_env
+      - build:
+          requires: [configure_env]
       - test:
           requires: [build]
       - build_and_push_docker_image:

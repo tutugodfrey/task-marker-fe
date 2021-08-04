@@ -1,0 +1,5 @@
+namespace:
+  name: test-fe
+
+container:
+  tag: test-104

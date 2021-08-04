@@ -1,5 +1,5 @@
 namespace:
-  name: dev
+  name: dev-fe
 
 deployment:
   name: task-marker-fe-deployment

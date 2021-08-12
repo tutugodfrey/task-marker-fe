@@ -8,7 +8,7 @@ deployment:
 container:
   name: task-marker-fe-container
   image: tutug/task-marker-fe
-  tag: 104
+  tag: dev-170
   containerPort: 80
 
 selector:

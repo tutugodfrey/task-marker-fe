@@ -2,4 +2,4 @@ namespace:
   name: staging-fe
 
 container:
-  tag: staging-104
+  tag: staging-174

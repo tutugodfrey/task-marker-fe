@@ -1,5 +1,4 @@
-namespace:
-  name: dev-fe
+namespace: task-marker-dev
 
 deployment:
   name: task-marker-fe-deployment
@@ -32,4 +31,11 @@ volumes:
   shared_logs:
     name: shared-logs
     mountPath: /var/log/nginx
+  nginx_volume:
+    name: nginx-config
+    mountPath: /etc/nginx/nginx.conf
+    # mountPath: /etc/nginx/conf.d/
 
+configMap:
+  name: nginx-config
+  backend_service_endpoint: http://task-marker-be-service.task-marker-dev.svc.cluster.local:3005/api

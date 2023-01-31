@@ -1,5 +1,5 @@
 namespace:
-  name: staging-fe
+  name: task-marker-staging
 
 container:
   tag: staging-174

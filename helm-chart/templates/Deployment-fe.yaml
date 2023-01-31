@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Values.deployment.name }}
-  namespace: {{ .Values.namespace.name }}
+  namespace: {{ .Values.namespace }}
   labels:
     app: {{ .Values.selector.app }}
 spec:
@@ -36,13 +36,20 @@ spec:
         imagePullPolicy: Always
         volumeMounts:
         - name: {{ .Values.volumes.shared_logs.name }}
-          mountPath: {{ .Values.volumes.shared_logs.mountPath }} 
+          mountPath: {{ .Values.volumes.shared_logs.mountPath }}
+        - name: {{ .Values.volumes.nginx_volume.name }}
+          mountPath: {{ .Values.volumes.nginx_volume.mountPath }}
+          subPath: nginx.conf
       - name: log-container
         image: busybox:latest
         command: ["sh", "-c", "while true; do cat /var/log/nginx/access.log /var/log/nginx/error.log; sleep 30; done"]
+        # command: ["sh", "-c", "while true; do echo Hello; done"]
         volumeMounts:
         - name: {{ .Values.volumes.shared_logs.name }}
           mountPath: {{ .Values.volumes.shared_logs.mountPath }}    
       volumes:
       - name: {{ .Values.volumes.shared_logs.name }}
         emptyDir: {}
+      - name: {{ .Values.volumes.nginx_volume.name }}
+        configMap:
+          name: {{ .Values.configMap.name }}

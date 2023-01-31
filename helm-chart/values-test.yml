@@ -1,5 +1,5 @@
 namespace:
-  name: test-fe
+  name: task-marker-test
 
 container:
   tag: test-104

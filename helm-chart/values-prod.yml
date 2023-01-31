@@ -1,5 +1,5 @@
 namespace:
-  name: prod-fe
+  name: task-marker-prod
 
 container:
   tag: prod-104

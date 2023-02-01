@@ -1,5 +1,7 @@
 namespace: task-marker-dev
 
+environment: develop
+
 deployment:
   name: task-marker-fe-deployment
   replicaCount: 1
@@ -18,6 +20,9 @@ service:
   port: 80
   targetPort: 80
   type: LoadBalancer
+
+ingress:
+  name: task-marker-fe
 
 resources:
   requests:

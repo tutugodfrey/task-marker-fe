@@ -1,48 +1,54 @@
-import React, { Component } from 'react';
-import { observer, inject } from 'mobx-react';
-import { compose } from 'recompose';
-import { withRouter, Link } from 'react-router-dom';
-import { request, closeConsole } from '../helpers';
+import React, { useState } from 'react';
+import { observer } from 'mobx-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { request } from '../helpers/index.js';
+import store from '../store/index.js';
+import ConsoleModal from './ConsoleModal.jsx';
+import{ ROUTES } from '../constants/index.js';
 
-import ConsoleModal from './ConsoleModal';
+const { 
+  SIGN_UP,
+  DASHBOARD,
+  BASE_ROUTE,
+} = ROUTES;
 
-
-export class SignIn extends Component {
-  constructor() {
-    super()
-    this.closeConsole = closeConsole.bind(this)
-    this.state = {
-      consoleMessage: '',
-      user: {
-        username: '',
-        password: '',
-      }
+const SignIn = () => {
+  const navigate = useNavigate()
+  const [ state, setState ] = useState({
+    consoleMessage: '',
+    user: {
+      username: '',
+      password: '',
     }
-    this.onSignIn = this.onSignIn.bind(this);
-    this.handleChange = this.handleChange.bind(this)
-  }
+  });
 
-  handleChange(event) {
+  let disableSubmit;
+  const { password, username } = state.user;
+  const { consoleMessage } = state;
+  !password || !username ? disableSubmit = true : disableSubmit = false;
+
+  const handleChange = (event) => {
     const { name, value } = event.target;
-    this.setState({
-      ...this.state,
+    setState({
+      ...state,
       user: {
-        ...this.state.user,
+        ...state.user,
         [name]: value
       }
     });
   }
 
-  async onSignIn(event) {
+  const onSignIn = async (event) => {
     event.preventDefault();
     let allFieldPass = true;
-    for(let field in this.state.user) {
-      if (!this.state.user[field]) {
+    for(let field in state.user) {
+      if (!state.user[field]) {
         allFieldPass = false;
       }
     }
+
     if (allFieldPass) {
-      const createdUser =  await request('/users/signin', 'POST', this.state.user);
+      const createdUser =  await request('/users/signin', 'POST', state.user);
       if (createdUser.message) {
         const { message } = createdUser;
         let errorMessage = message;
@@ -50,89 +56,82 @@ export class SignIn extends Component {
           errorMessage =
             'Unsuccessful login! Please check your username and password'
         }
-        this.setState({
-          ...this.state,
+        setState({
+          ...state,
           consoleMessage: errorMessage,
-        })
+        });
+        store.consoleMessage.setMessage(errorMessage);
         return null;
       }
-      localStorage.setItem('token', createdUser.token)
-      this.props.userStore.setUser(createdUser)  
-      this.props.history.push('/dashboard')
+      localStorage.setItem('token', createdUser.token);
+      store.userStore.setUser(createdUser);
+      navigate(DASHBOARD);
     }
   }
 
-  render() {
-    let disableSubmit;
-    const { password, username } = this.state.user;
-    const { consoleMessage } = this.state;
-    !password || !username ? disableSubmit = true : disableSubmit = false;
-    return (
-      <div id="signin-page">
-        <div className="back-link_div">
-          <Link to="/">&laquo; Back</Link>
+  const resetConsole = () => {
+    setState({
+      ...state,
+      consoleMessage: '',
+    });
+  };
+
+  return (
+    <div id="signin-page">
+      <div className="back-link_div">
+        <Link to={BASE_ROUTE}>&laquo; Back</Link>
+      </div>
+      <div className="sign-in">
+      { consoleMessage && <ConsoleModal resetConsole={resetConsole} /> }   
+        <div>
+          <h3>Sign In</h3>
         </div>
-        <div className="sign-in">
-          {consoleMessage &&
-            <ConsoleModal
-              message={consoleMessage}
-              closeConsole={this.closeConsole}
-            />
-          }
+        <form>
           <div>
-            <h3>Sign In</h3>
-          </div>
-          <form>
-            <div>
-              <div className="form-group">
-                <div><label>Username</label>
-                  <span className="requiredFields">*</span>
-                </div>
-                <input
-                  type="text"
-                  name="username"
-                  value={this.state.user.username}
-                  onChange={this.handleChange}
-                />
-              </div>
-            </div>
             <div className="form-group">
-              <div><label>Password</label>
+              <div><label>Username</label>
                 <span className="requiredFields">*</span>
               </div>
-              <div>
-                <input 
-                  type="password"
-                  name="password"
-                  value={this.state.user.password}
-                  onChange={this.handleChange}
-                  />
-              </div>
+              <input
+                type="text"
+                name="username"
+                value={state.user.username}
+                onChange={handleChange}
+              />
             </div>
-            <div className="form-group">
-              <div>
-                <input
-                  type="submit"
-                  id="submitLogin"
-                  onClick={this.onSignIn}
-                  disabled={disableSubmit}
-                  value="Sign In"
-                />
-              </div>
-            </div>
-          </form>
-          <div>
-            <p>I don't have an account!
-              <Link to="/signup">Sign Up</Link></p>
           </div>
+          <div className="form-group">
+            <div><label>Password</label>
+              <span className="requiredFields">*</span>
+            </div>
+            <div>
+              <input 
+                type="password"
+                name="password"
+                value={state.user.password}
+                onChange={handleChange}
+                />
+            </div>
+          </div>
+          <div className="form-group">
+            <div>
+              <input
+                type="submit"
+                id="submitLogin"
+                onClick={onSignIn}
+                disabled={disableSubmit}
+                value="Sign In"
+              />
+            </div>
+          </div>
+        </form>
+        <div>
+          <p>I don't have an account?
+            <Link to={SIGN_UP}>Sign Up</Link></p>
         </div>
       </div>
-    )
-  }
+    </div>
+  )
 }
 
-export default compose(
-  inject('userStore'),
-  observer,
-  withRouter,
-)(SignIn);
+export default observer(SignIn);

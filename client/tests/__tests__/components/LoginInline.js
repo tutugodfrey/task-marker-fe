@@ -1,13 +1,19 @@
 import React from 'react';
-import { LoginInline } from '../../../components/LoginInline';
+import { BrowserRouter } from 'react-router-dom';
+import LoginInline from '../../../components/LoginInline.jsx';
 
-const wrapper = shallow(<LoginInline />);
+const  wrapper = mount(
+  <BrowserRouter>
+    <LoginInline />
+  </BrowserRouter>
+);
+
 describe('LoginInline Test', () => {
   test('wrapper is a div', () => {
-    expect(wrapper.is('div')).toBeTruthy();
-    expect(wrapper.props().id).toBe('login-inline');
+    expect(wrapper.childAt(0).children().childAt(0).is('div')).toBeTruthy();
+    expect(wrapper.childAt(0).children().childAt(0).props().id).toBe('login-inline');
+    expect(wrapper.children().childAt(0).children().childAt(0).is('form')).toBeTruthy();
     expect(wrapper.length).toBe(1);
-    expect(wrapper.children().first().is('form')).toBeTruthy()
   });
 
   test('should find the id of the component', () => {

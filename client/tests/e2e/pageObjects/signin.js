@@ -1,6 +1,5 @@
-import selectors from './selectors';
-import Base from './base';
-import { testUsers } from '../../../../helpers';
+import { selectors, Base } from './index.js'
+import { testUsers } from '../../../../helpers/index.js';
 
 const base = Base();
 const { signinPage } = selectors;
@@ -21,7 +20,7 @@ export default {
     const submitBtn = await base.find(selectors.landingPage.loginBtn);
     await usernameInput.sendKeys(username);
     await passwordInput.sendKeys(passwd);
-    await submitBtn.click();
-    return null;
+    const result = await submitBtn.click();
+    return result;
   },
 }

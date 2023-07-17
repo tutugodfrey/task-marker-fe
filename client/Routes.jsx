@@ -1,30 +1,29 @@
 import React from 'react';
-import { BrowserRouter, Switch, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Home from './components/Home.jsx';
 import Signup from './components/Signup.jsx';
 import Signin from './components/Signin.jsx';
 import Dashboard from './components/Dashboard.jsx';
 import Profile from './components/Profile.jsx';
 import NotFoundPage from './components/NotFoundPage.jsx';
+import store from './store/index.js'
+import { ROUTES } from './constants/index.js'
 
-import { ROUTES } from './constants'
-
-const Routes = (props) => {
+const Router = () => {
   return (
     <div>
       <BrowserRouter>
-        <Switch>
-          <Route path={ROUTES.BASE} exact component={Home} />
-          <Route path={ROUTES.SIGN_UP} exact component={Signup} />
-          <Route path={ROUTES.SIGN_UP} exact component={Signup} />
-          <Route path={ROUTES.SIGN_IN} exact component={Signin} />
-          <Route path={ROUTES.DASHBOARD} exact component={Dashboard} />
-          <Route path={ROUTES.PROFILE} exact component={Profile} />
-          <Route><NotFoundPage /> </Route>
-        </Switch>
+        <Routes>
+          <Route path={ROUTES.BASE_ROUTE} exact element={<Home />} />
+          <Route path={ROUTES.SIGN_UP} exact element={<Signup store={store} />} />
+          <Route path={ROUTES.SIGN_IN} exact element={<Signin />} />
+          <Route path={ROUTES.DASHBOARD} exact element={<Dashboard store={store}/>} />
+          <Route path={ROUTES.PROFILE} exact element={<Profile />} />
+          <Route path="*" element={<NotFoundPage />}/>
+        </Routes>
       </BrowserRouter>
     </div>
   )
 }
 
-export default Routes;
+export default Router;

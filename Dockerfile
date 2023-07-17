@@ -1,4 +1,4 @@
-FROM node:12-alpine as build
+FROM node:18-alpine as build
 RUN apk update
 
 LABEL maintainer="Tutu Godfrey <godfrey_tutu@yahoo.com>"

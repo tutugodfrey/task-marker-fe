@@ -45,7 +45,6 @@ export default {
     linkDescriptionInput: By.css('#link-text'),
     linkUrlInput: By.css('#link-url'),
     addLinkBtn: By.css('#update-links'),
-    saveTaskBtn: By.css('div#todo-form_container div.form-group > button'),
     toggleTaskFormBtn: By.css('#toggle-todoform_button'),
     addDeadlineBtn: By.css('#todos-container form #add-deadline-btn button'),
     moveYearBackwardBtn: By.css('#todos-container form #month-year > div:nth-child(1) button:nth-of-type(1)'),
@@ -55,6 +54,7 @@ export default {
     daySelector: (week, day) => {
       return By.css(`#days > div:nth-child(${week}) > div > :nth-child(${day}) button`);
     },
+    saveTaskBtn: By.css('div#todo-form_container div.form-group > button#save-button'),
   },
   tasksContainer: {
     createdTodoTitle: By.css('div.todo-bar div[id*="toggle-todo-1-mini"] .todo-bar_title'),

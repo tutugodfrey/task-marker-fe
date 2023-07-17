@@ -1,5 +1,4 @@
-import selectors from './selectors';
-import Base from './base';
+import { selectors, Base } from './index.js'
 
 const base = Base();
 const By = base.By;

@@ -1,6 +1,7 @@
 import 'chromedriver';
 import webdriver from 'selenium-webdriver';
-import selectors from './selectors';
+import { selectors } from './index.js'
+
 const { By, until } = webdriver
 const driver = new webdriver.Builder()
   .forBrowser('chrome')
@@ -58,6 +59,5 @@ export default () => {
     closeConsoleModal: async () => {
       await driver.findElement(selectors.closeConsoleModalBtn).click()
     },
-
   }
 }

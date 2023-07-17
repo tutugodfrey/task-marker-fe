@@ -1,39 +1,45 @@
 import React from 'react';
-import { Profile } from '../../../components/Profile';
-import { testUsers } from '../../../../helpers';
+import { BrowserRouter } from 'react-router-dom';
+import Profile from '../../../components/Profile.jsx';
+import { testUsers } from '../../../../helpers/index.js';
+import store from '../../../store/index.js';
+
 
 const { user1 } = testUsers
 const userStore = {
   setUser: jest.fn(),
   getUser: user1
-}
+};
 let wrapper;
 fetch.mockResponseOnce(JSON.stringify({
   ...user1
- }))
+}))
+
+store.userStore.setUser(user1)
 describe('Profile component test', () => {
   beforeAll(() => {
-    wrapper = shallow(<Profile userStore={userStore}/>);
+    wrapper = mount(<BrowserRouter><Profile /></BrowserRouter>);
   });
   describe('General', () => {
     test('should find parent div', () => {
       const children = wrapper.children();
-      expect(wrapper.name()).toBe('div');
-      expect(children.length).toBe(3)
-      expect(children.first().name()).toBe('withRouter(Navigation)');
-      expect(children.at(1).name()).toBe('div');
-      expect(children.last().name()).toBe('div');
+      expect(children.childAt(0).name()).toBe('Memo(Profile)');
+      expect(children.childAt(0).children().childAt(0).name()).toBe('Navigation');
+      expect(children.childAt(0).children().childAt(1).name()).toBe('div');
+      expect(children.childAt(0).children().first().childAt(0).children().childAt(0).name()).toBe('div');
+      expect(children.childAt(0).children().first().childAt(0).children().childAt(0).children().childAt(0).name()).toBe('a');
+      expect(children.childAt(0).children().first().childAt(0).children().childAt(0).children().childAt(0).prop('href')).toBe('/signin');
     });
 
     test('should Back link', () => {
       expect(wrapper.find('.back-link_div').name()).toBe('div');
-      expect(wrapper.find('Link').props().to).toEqual('/dashboard');
-      expect(wrapper.find('Link').props()
+      expect(wrapper.find('.back-link_div').children().first().props().to).toEqual('/dashboard');
+      expect(wrapper.find('.back-link_div').children().first().props()
         .children).toEqual(expect.stringContaining('Back'));
     });
 
     test('should find Navigation component', () => {
-      const nav = wrapper.find('withRouter(Navigation)');
+      const nav = wrapper.find('Navigation');
       expect(nav.length).toBe(1)
     });
 
@@ -66,14 +72,14 @@ describe('Profile component test', () => {
       expect(childrenInfo.at(1).props().id).toBe('profile-image_div');
       expect(childrenInfo.at(1).name()).toBe('div');
       expect(childrenInfo.at(1).children().at(0).type()).toBe('img');
-      expect(childrenInfo.at(1).children().at(0).props().src).toBe('public/profilePhotos/default-profile.png');
+      expect(childrenInfo.at(1).children().at(0).props().src).toBe('/profilePhotos/default-profile.png');
       expect(childrenInfo.at(1).children().at(3).name()).toBe('button');
       expect(childrenInfo.at(1).children().at(3).props().children).toBe('Change');
       wrapper.find('#change-profile-photo').simulate('click');
       expect(wrapper.find('#profile-image_div').children().at(3).type()).toBe('input')
       expect(wrapper.find('#profile-image_div').children().at(3).props().type).toBe('file')
       expect(wrapper.find('#profile-image_div').children().at(5).type()).toBe('button')
-      expect(wrapper.find('#profile-image_div').children().at(5).text()).toBe('Cancle')
+      expect(wrapper.find('#profile-image_div').children().at(5).text()).toBe('Cancel')
     });
 
     test('should render email', () => {
@@ -102,54 +108,52 @@ describe('Profile component test', () => {
 
   describe('Edit mode on', () => {
     let editProfile;
-    let children;
     beforeAll(() => {
-      wrapper.setState({ editMode: true });
+      wrapper.find('#edit-profile-btn_div').find('button').simulate('click');
       editProfile = wrapper.find('#edit-profile');
-      children = editProfile.children();
     });
 
     test('should find edit-profile', () => {
       expect(editProfile.name()).toBe('div');
-      expect(children.length).toBe(4)
+      expect(editProfile.children().length).toBe(4);
     });
 
     test('should render image', () => {
-      expect(children.at(0).props().className).toBe('profile-image_div');
-      expect(children.at(0).name()).toBe('div');
-      expect(children.at(0).children().type()).toBe('img');
-      expect(children.at(0).children().props().src).toBe('public/profilePhotos/default-profile.png');
+      expect(editProfile.childAt(0).props().className).toBe('profile-image_div');
+      expect(editProfile.childAt(0).name()).toBe('div');
+      expect(editProfile.childAt(0).children().type()).toBe('img');
+      expect(editProfile.childAt(0).children().props().src).toBe('/profilePhotos/default-profile.png');
     });
 
     test('should render name for editing', () => {
-      expect(children.at(1).props().className).toBe('input-group');
-      expect(children.at(1).children().length).toBe(2);
-      expect(children.at(1).childAt(0).type()).toBe('label');
-      expect(children.at(1).childAt(1).type()).toBe('input');
-      expect(children.at(1).childAt(1).props().name).toBe('name');
-      expect(children.at(1).childAt(1).props().type).toBe('text');
-      expect(children.at(1).childAt(1).props().value).toBe(user1.name);
+      expect(editProfile.childAt(1).props().className).toBe('input-group');
+      expect(editProfile.childAt(1).children().length).toBe(2);
+      expect(editProfile.childAt(1).children().at(0).type()).toBe('label');
+      expect(editProfile.childAt(1).children().at(1).type()).toBe('input');
+      expect(editProfile.childAt(1).children().at(1).props().name).toBe('name');
+      expect(editProfile.childAt(1).children().at(1).props().type).toBe('text');
+      expect(editProfile.childAt(1).children().at(1).props().value).toBe(user1.name);
     });
 
     test('should render email for editing', () => {
-      expect(children.at(2).props().className).toBe('input-group');
-      expect(children.at(2).children().length).toBe(2);
-      expect(children.at(2).childAt(0).type()).toBe('label');
-      expect(children.at(2).childAt(1).type()).toBe('input');
-      expect(children.at(2).childAt(1).props().name).toBe('email');
-      expect(children.at(2).childAt(1).props().type).toBe('text');
-      expect(children.at(2).childAt(1).props().value).toBe(user1.email);
+      expect(editProfile.childAt(2).props().className).toBe('input-group');
+      expect(editProfile.childAt(2).children().length).toBe(2);
+      expect(editProfile.childAt(2).childAt(0).type()).toBe('label');
+      expect(editProfile.childAt(2).childAt(1).type()).toBe('input');
+      expect(editProfile.childAt(2).childAt(1).props().name).toBe('email');
+      expect(editProfile.childAt(2).childAt(1).props().type).toBe('text');
+      expect(editProfile.childAt(2).childAt(1).props().value).toBe(user1.email);
     });
 
     test('should display Save and Cancel buttons', () => {
-      expect(children.at(3).props().id).toBe('btn-group');
-      expect(children.at(3).children().children().length).toBe(2);
-      expect(children.at(3).childAt(0).children().text()).toBe('Save');
-      expect(children.at(3).childAt(0).children().type()).toBe('button');
-      expect(children.at(3).childAt(0).children().props().id).toBe('save-edit');
-      expect(children.at(3).childAt(1).children().text()).toBe('Cancel');
-      expect(children.at(3).childAt(1).children().type()).toBe('button');
-      expect(children.at(3).childAt(1).children().props().id).toBe('cancel-edit');
+      expect(editProfile.childAt(3).props().id).toBe('btn-group');
+      expect(editProfile.childAt(3).children().children().length).toBe(2);
+      expect(editProfile.childAt(3).childAt(0).children().text()).toBe('Save');
+      expect(editProfile.childAt(3).childAt(0).children().type()).toBe('button');
+      expect(editProfile.childAt(3).childAt(0).children().props().id).toBe('save-edit');
+      expect(editProfile.childAt(3).childAt(1).children().text()).toBe('Cancel');
+      expect(editProfile.childAt(3).childAt(1).children().type()).toBe('button');
+      expect(editProfile.childAt(3).childAt(1).children().props().id).toBe('cancel-edit');
     });
   });
 });

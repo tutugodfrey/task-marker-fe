@@ -3,7 +3,7 @@ import chaiAsPromised from 'chai-as-promised';
 import chai from 'chai'
 import { Calendar } from '../../../components/Calendar.jsx';
 import { expect } from 'chai';
-chai.use(chaiAsPromised)
+// chai.use(chaiAsPromised)
 
 describe('<Calendar /> component test', () => {
   describe('Render calendar with default current day', () => {

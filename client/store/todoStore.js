@@ -8,11 +8,11 @@ class TodoStore {
   }
 
   @action setTodo = todos => {
-    return this.todos = todos;
+    return this.todos = [ ...todos ];
   };
 
   @action addTodo = todo => {
-    return this.todos.push(todo);
+    this.todos = [ ...this.todos, todo ];
   };
 
   @action updateTodo = updatedTodo => {
@@ -21,6 +21,8 @@ class TodoStore {
         return this.todos[index] = updatedTodo;
       }
     });
+
+    this.todos = [ ...this.todos ]
   };
 
   @action deleteTodo = (id) => {
@@ -30,15 +32,17 @@ class TodoStore {
         return this.todos;
       }
     });
-  }
+  };
 
   @computed get getTodos() {
-    return this.todos.map(todo => {
-      const keys = Object.keys();
+    this.todos.map(todo => {
+      const keys = Object.keys(todo);
       return keys.map(key => ({
         [key]: todo[key]
-      }));
+        })
+      );
     });
+    return this.todos;
   };
 }
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home } from '../../../components/Home.jsx';
+import Home  from '../../../components/Home.jsx';
 
 let wrapper = shallow(<Home />);
 describe('<Home /> component test', () => {
@@ -14,9 +14,12 @@ describe('<Home /> component test', () => {
     expect(vara.text()).toBe('Task marker let you keep track of your goals for the day');
   });
 
+  test('should find Navigation component', () => {
+    expect(wrapper.childAt(0).name()).toBe('Navigation');
+  })
+
   test('should find the LoginInline component', () => {
     expect(wrapper.children().at(1).children().childAt(1).name())
-      .toBe('inject-withRouter(LoginInline)-with-userStore');
-      expect(wrapper.childAt(0).name()).toBe('withRouter(Navigation)');
+      .toBe('Memo()');
   });
 });

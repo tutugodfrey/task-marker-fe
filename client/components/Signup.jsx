@@ -1,211 +1,206 @@
-import React, { Component } from 'react';
-import { withRouter, Link } from 'react-router-dom';
-import { observer, inject } from 'mobx-react';
-import { compose } from 'recompose';
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { observer } from 'mobx-react';
+import store from '../store/index.js';
+import ConsoleModal from './ConsoleModal.jsx';
+import { request } from '../helpers/index.js';
 
-import ConsoleModal from './ConsoleModal';
+const Signup = () => {
+  const navigate = useNavigate()
+  const [ state, setState ] = useState({
+    ...state,
+    consoleMessage: '',
+    createdUser: {},
+    user: {
+      name: '',
+      email: '',
+      username: '',
+      password: '',
+      confirmPassword: ''
+    },
+  });
+  const { consoleMessage } = state;
+  store.consoleMessage.setMessage(consoleMessage);
 
-import { request, closeConsole } from '../helpers';
+  let disabled;
+  const {
+    name,
+    email,
+    username,
+    password,
+    confirmPassword
+  } = state.user;
 
-  export class Signup extends Component  {
-    constructor(props) {
-      super(props);
-      this.closeConsole = closeConsole.bind(this)
-      this.state =  {
-        consoleMessage: '',
-        user: {
-          name: '',
-          email: '',
-          username: '',
-          password: '',
-          confirmPassword: ''
-        },
-        createdUser: {},
-      };
-      this.handleChange = this.handleChange.bind(this);
-      this.handleSubmit = this.handleSubmit.bind(this);
-    }
-  
-  
-  
-    handleChange(event) {
-      // event.preventDefault();
-      const { name, value } = event.target;
-      this.setState({
-        ...this.state,
-        user: {
-          ...this.state.user,
-          [name]: value
-        }
-      });
-    }
+  // Disable Signup Button until all fields are filled
+  !name ||
+  !email ||
+  !username ||
+  !password ||
+  !confirmPassword ? disabled = true : disabled = false;
 
-    async handleSubmit(event) {
-      event.preventDefault();
-      const { user } = this.state
-      let allFieldPass = true;
-      for(let field in user) {
-        if (!user[field]) {
-          console.log(field, user[field], 'missing value')
-          allFieldPass = false;
-        }
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setState({
+      ...state,
+      user: {
+        ...state.user,
+        [name]: value
       }
+    });
+  };
 
-      if (user.password !== user.confirmPassword) {
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const { user } = state
+    let allFieldPass = true;
+    for(let field in user) {
+      if (!user[field]) {
         allFieldPass = false;
-        this.setState({
-          consoleMessage: 'Please enter matching passwords'
-        });
-      }
-      if (allFieldPass) {
-        const createdUser =  await request('/users/signup', 'POST', user);
-        if (createdUser.message) {
-          let errorMessage = createdUser.message;
-          if (errorMessage.indexOf('unique') >= 0) {
-            errorMessage = 'User with detail you provide already exist'
-          }
-          this.setState({
-            consoleMessage: errorMessage,
-          });
-          console.log(createdUser.message)
-          return null;
-        }
+        setState({
+          ...state,
+          consoleMessage: `Missing required field ${field}`,
+        })
+        store.consoleMessage.setMessage(state.consoleMessage);
+        return null;
+      };
+    };
 
-        localStorage.setItem('token', createdUser.token)
-        this.props.userStore.setUser(createdUser)  
-        this.props.history.push('/dashboard')
-      }
+    if (user.password !== user.confirmPassword) {
+      allFieldPass = false;
+      setState({
+        ...state,
+        consoleMessage: 'Please enter matching passwords'
+      });
+      store.consoleMessage.setMessage(state.consoleMessage)
     }
-    render() {
-      let disabled;
-      const {
-        name,
-        email,
-        username,
-        password,
-        confirmPassword
-      } = this.state.user;
-      const { consoleMessage } = this.state;
-      !name ||
-      !email ||
-      !username ||
-      !password ||
-      !confirmPassword ? disabled = true : disabled = false;
-      return (
-        <div id="signup-page">
-          <div className="back-link_div">
-            <Link to="/">&laquo; Back</Link>
-          </div>
-          <div className="sign-up">
-            {consoleMessage &&
-              <ConsoleModal
-                message={consoleMessage}
-                closeConsole={this.closeConsole}
-              />
-            }
-            <form>
-              <div>
-                <h3>Sign Up</h3>
+    if (allFieldPass) {
+      const createdUser =  await request('/users/signup', 'POST', user);
+      if (createdUser.message) {
+        let errorMessage = createdUser.message;
+        if (errorMessage.indexOf('unique') >= 0) {
+          errorMessage = 'User with detail you provide already exist'
+        }
+        setState({
+          ...state,
+          consoleMessage: errorMessage,
+        });
+        store.consoleMessage.setMessage(state.consoleMessage)
+        return null;
+      }
+      localStorage.setItem('token', createdUser.token)
+      store.userStore.setUser(createdUser)  
+      navigate('/dashboard')
+    };
+  };
+
+  const resetConsole = () => {
+    setState({
+      ...state,
+      consoleMessage: '',
+    });
+  };
+
+  return (
+    <div id="signup-page">
+      <div className="back-link_div">
+        <Link to="/">&laquo; Back</Link>
+      </div>
+      <div className="sign-up">
+        {consoleMessage &&  <ConsoleModal resetConsole={resetConsole} /> }
+        <div>
+          <h3>Sign Up</h3>
+        </div>
+        <form>
+          <div>
+            <div className="form-group">
+              <div><label>Name</label>
+                <span className="requiredFields">*</span>
               </div>
               <div>
-                <div className="form-group">
-                  <div><label>Name</label>
-                    <span className="requiredFields">*</span>
-                  </div>
-                  <div>
-                    <input
-                      type="text"
-                      name="name"
-                      placeholder="Full Name"
-                      value={name}
-                      onChange={this.handleChange.bind(this)}
-                    />
-                  </div>
-                </div>
-                <div className="form-group">
-                  <div><label>Email</label>
-                    <span className="requiredFields">*</span>
-                  </div>
-                  <div>
-                    <input 
-                      type="text"
-                      name="email"
-                      placeholder="Email"
-                      value={email}
-                      onChange={this.handleChange}
-                    />
-                  </div>
-                </div>
-                <div className="form-group">
-                  <div><label>Username</label>
-                    <span className="requiredFields">*</span>
-                  </div>
-                  <div>
-                    <input
-                      type="text"
-                      name="username"
-                      placeholder="Username"
-                      value={username}
-                      onChange={this.handleChange}
-                    />
-                  </div>
-                </div>
-                <div className="form-group">
-                  <div><label>password</label>
-                    <span className="requiredFields">*</span>
-                  </div>
-                  <div>
-                    <input
-                      type="password"
-                      name="password"
-                      placeholder="Password"
-                      value={password}
-                      onChange={this.handleChange}
-                    />
-                  </div>
-                </div>
-                <div className="form-group">
-                  <div><label>Confirm Password</label>
-                    <span className="requiredFields">*</span>
-                  </div>
-                  <div>
-                    <input
-                      type="password"
-                      name="confirmPassword"
-                      placeholder="Confirm"
-                      value={confirmPassword}
-                      onChange={this.handleChange}
-                    />
-                  </div>
-                </div>
-                <div>
-                <div className="form-group">
-                  <div>
-                    <input
-                      type="submit"
-                      name="signup"
-                      value="Sign Up"
-                      id="submit-btn"
-                      disabled={disabled}
-                      onClick={this.handleSubmit}
-                    />
-                  </div>
-                </div>
-                </div>
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="Full Name"
+                  onChange={handleChange}
+                />
               </div>
-            </form>
+            </div>
+            <div className="form-group">
+              <div><label>Email</label>
+                <span className="requiredFields">*</span>
+              </div>
+              <div>
+                <input 
+                  type="text"
+                  name="email"
+                  placeholder="Email"
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+            <div className="form-group">
+              <div><label>Username</label>
+                <span className="requiredFields">*</span>
+              </div>
+              <div>
+                <input
+                  type="text"
+                  name="username"
+                  placeholder="Username"
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+            <div className="form-group">
+              <div><label>password</label>
+                <span className="requiredFields">*</span>
+              </div>
+              <div>
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="Password"
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+            <div className="form-group">
+              <div><label>Confirm Password</label>
+                <span className="requiredFields">*</span>
+              </div>
+              <div>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  placeholder="Confirm"
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
             <div>
-              <p>I already have an account! 
-                <Link to="/signin"> Sign In here</Link></p>
+            <div className="form-group">
+              <div>
+                <input
+                  type="submit"
+                  name="signup"
+                  value="Sign Up"
+                  id="submit-btn"
+                  disabled={disabled}
+                  onClick={handleSubmit}
+                />
+              </div>
+            </div>
             </div>
           </div>
+        </form>
+        <div>
+          <p>I already have an account? 
+            <Link to="/signin">Sign In</Link>
+          </p>
         </div>
-      )
-    }
-  }
+      </div>
+    </div>
+  );
+};
 
-export default compose(
-  inject('userStore'),
-  observer,
-  withRouter
-)(Signup);
+export default observer(Signup);

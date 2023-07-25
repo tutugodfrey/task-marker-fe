@@ -1,22 +1,21 @@
 import React from 'react';
-import { Redirect } from 'react-router-dom';
-import request from './request';
-import { ROUTES } from '../constants'
+import { Navigate } from 'react-router-dom';
+import request, { baseUrl } from './request.js';
+import { ROUTES } from '../constants/index.js'
 
-function closeConsole (event) {
-  this.setState({
-    consoleMessage: '',
-  })
-}
+const { SIGN_IN } = ROUTES;
+// function closeConsole (event) {
+//   this.setState({
+//     consoleMessage: '',
+//   })
+// }
 
 const logout = (event) => {
-  // localStorage.clear();
-  // event.preventDefault()
-  return <Redirect to="/signin" />
+  return <Navigate to={SIGN_IN} />
 }
 
 export {
   request,
-  closeConsole,
   logout,
+  baseUrl,
 }

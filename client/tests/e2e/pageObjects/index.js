@@ -1,8 +1,10 @@
-import dashboard from './dashboard';
-import signupPage from './signup';
-import landingPage from './landingPage';
-import profilePage from './profilePage';
-import signinPage from './signin';
+import dashboard from './dashboard.js';
+import signupPage from './signup.js';
+import landingPage from './landingPage.js';
+import profilePage from './profilePage.js';
+import signinPage from './signin.js';
+import selectors from './selectors.js';
+import Base from './base.js';
 
 export {
   landingPage,
@@ -10,4 +12,6 @@ export {
   signinPage,
   dashboard,
   profilePage,
+  selectors,
+  Base,
 };

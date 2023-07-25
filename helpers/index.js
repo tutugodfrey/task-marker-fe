@@ -1,5 +1,5 @@
-import testUsers from './testUsers';
-import testTodos from './testTodos';
+import testUsers from './testUsers.js';
+import testTodos from './testTodos.js';
 
 export {
   testUsers,

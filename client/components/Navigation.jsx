@@ -1,40 +1,48 @@
-import React, { Component, Fragment } from 'react'
-import { Link, withRouter } from 'react-router-dom';
+import React, { Fragment } from 'react'
+import { Link, useNavigate } from 'react-router-dom';
+import{ ROUTES } from '../constants/index.js';
 
-export class Navigation extends Component {
-  logout() {
+const { 
+  BASE_ROUTE,
+  SIGN_UP,
+  SIGN_IN,
+  DASHBOARD,
+  PROFILE
+} = ROUTES;
+
+const Navigation = () => {
+  const navigate = useNavigate();
+  const logout = () => {
     localStorage.clear();
-    return this.props.history.push('/signin')
+    return navigate(SIGN_IN)
   }
 
-  render() {
-    const isLoggedIn = !!localStorage.getItem('token')
-    return (
-      <div id="nav-bar">
-        {isLoggedIn ? (
-          <Fragment>
-            <div id="home">
-              <Link to='/'>Home</Link>
-            </div>
-            <div id="dashboard">
-              <Link to='./dashboard'>Tasks</Link>
-            </div>
-            <div id="profile">
-              <Link to='./profile'>Profile</Link>
-            </div>
-            <div id="logout">
-              <a onClick={this.logout.bind(this)}>Log Out</a>
-            </div>
-          </Fragment>
-        ) : (
-          <Fragment>
-            <div id="signin"><Link to="/signin">Sign In</Link></div>
-            <div id="signup"><Link to='/signup'>Sign Up</Link></div>
-          </Fragment>
-        )}
-      </div>
-    );
-  }
+  const isLoggedIn = !!localStorage.getItem('token')
+  return (
+    <div id="nav-bar">
+      {isLoggedIn ? (
+        <Fragment>
+          <div id="home">
+            <Link to={BASE_ROUTE}>Home</Link>
+          </div>
+          <div id="dashboard">
+            <Link to={DASHBOARD}>Tasks</Link>
+          </div>
+          <div id="profile">
+            <Link to={PROFILE}>Profile</Link>
+          </div>
+          <div id="logout">
+            <a onClick={logout}>Log Out</a>
+          </div>
+        </Fragment>
+      ) : (
+        <Fragment>
+          <div id="signin"><Link to={SIGN_IN}>Sign In</Link></div>
+          <div id="signup"><Link to={SIGN_UP}>Sign Up</Link></div>
+        </Fragment>
+      )}
+    </div>
+  );
 }
 
-export default withRouter(Navigation);
+export default Navigation;

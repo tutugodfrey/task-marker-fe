@@ -1,48 +1,46 @@
-import React, { Component } from 'react';
-import { observer, inject } from 'mobx-react';
-import { compose } from 'recompose';
-import { withRouter } from 'react-router-dom';
-import { request, closeConsole } from '../helpers';
+import React, { useState } from 'react';
+import { observer } from 'mobx-react';
+import { useNavigate } from 'react-router-dom';
+import { request, closeConsole } from '../helpers/index.js';
+import ConsoleModal from './ConsoleModal.jsx';
+import{ ROUTES } from '../constants/index.js';
+import store from '../store/index.js'
 
-import ConsoleModal from './ConsoleModal';
+const { DASHBOARD } = ROUTES;
 
-
-export class LoginInline extends Component {
-  constructor() {
-    super()
-    this.closeConsole = closeConsole.bind(this)
-    this.state = {
-      consoleMessage: '',
-      user: {
-        username: '',
-        password: '',
-      }
+const LoginInline = observer(() => {
+  const navigate = useNavigate()
+  const [ state, setState ] = useState({
+    consoleMessage: '',
+    user: {
+      username: '',
+      password: '',
     }
-    this.onSignIn = this.onSignIn.bind(this);
-    this.handleChange = this.handleChange.bind(this)
-  }
+  });
 
-  handleChange(event) {
+  const handleChange = (event) => {
     const { name, value } = event.target;
-    this.setState({
-      ...this.state,
+    setState({
+      ...state,
       user: {
-        ...this.state.user,
+        ...state.user,
         [name]: value
       }
     });
   }
 
-  async onSignIn(event) {
+  const onSignIn = async (event) => {
     event.preventDefault();
+    const { user } = state;
     let allFieldPass = true;
-    for(let field in this.state.user) {
-      if (!this.state.user[field]) {
+    for(let field in user) {
+      if (!user[field]) {
         allFieldPass = false;
       }
     }
     if (allFieldPass) {
-      const createdUser =  await request('/users/signin', 'POST', this.state.user);
+      const createdUser =  await request('/users/signin', 'POST', user);
+      console.log('Message', createdUser);
       if (createdUser.message) {
         const { message } = createdUser;
         let errorMessage = message;
@@ -50,66 +48,64 @@ export class LoginInline extends Component {
           errorMessage =
             'Unsuccessful login! Please check your username and password'
         }
-        this.setState({
+        setState({
+          ...state,
           consoleMessage: errorMessage,
         })
+        store.consoleMessage.setMessage(errorMessage);
         console.log(createdUser.message)
         return null;
       }
-      localStorage.setItem('token', createdUser.token)
-      this.props.userStore.setUser(createdUser)  
-      this.props.history.push('/dashboard')
+      localStorage.setItem('token', createdUser.token);
+      store.userStore.setUser(createdUser);
+      navigate(DASHBOARD);
     }
   }
 
-  render() {
-    let disableSubmit
-    const { password, username } = this.state.user;
-    const { consoleMessage } = this.state;
-    !password || !username ? disableSubmit = true : disableSubmit = false;
-    return (
-      <div id="login-inline">
-        {consoleMessage &&
-          <ConsoleModal
-            message={consoleMessage}
-            closeConsole={this.closeConsole}
-          />
-        }
-        <form>
-          <div id="form-group_container">
-            <div className="form-group">
-              <input
-                type="text"
-                name="username"
-                value={username}
-                onChange={this.handleChange}
-              />
-            </div>
-            <div className="form-group">
-              <input 
-                type="password"
-                name="password"
-                value={password}
-                onChange={this.handleChange}
-              />
-            </div>
-            <div className="form-group">
-              <input
-                type="submit"
-                onClick={this.onSignIn}
-                disabled={disableSubmit}
-                value="Sign In"
-              />
-            </div>
-          </div>
-        </form>
-      </div>
-    );
+  const resetConsole = () => {
+    setState({
+      ...state,
+      consoleMessage: '',
+    });
   };
-};
 
-export default compose(
-  inject('userStore'),
-  observer,
-  withRouter,
-)(LoginInline);
+  let disableSubmit
+  const { password, username } = state.user;
+  const { consoleMessage } = state;
+  !password || !username ? disableSubmit = true : disableSubmit = false;
+  return (
+    <div id="login-inline">
+      { consoleMessage && <ConsoleModal resetConsole={resetConsole} /> }
+      <form>
+        <div id="form-group_container">
+          <div className="form-group">
+            <input
+              type="text"
+              name="username"
+              value={username}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="form-group">
+            <input 
+              type="password"
+              name="password"
+              value={password}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="form-group">
+            <input
+              type="submit"
+              onClick={onSignIn}
+              disabled={disableSubmit}
+              value="Sign In"
+            />
+          </div>
+        </div>
+      </form>
+    </div>
+  );
+});
+
+export default LoginInline;

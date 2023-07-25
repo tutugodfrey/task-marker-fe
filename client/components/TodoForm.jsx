@@ -1,234 +1,236 @@
-import React, { Component } from 'react';
-import { compose } from 'recompose';
-import { observer, inject } from 'mobx-react';
-import ConsoleModal from './ConsoleModal';
-import Calendar from './Calendar';
-import { request, closeConsole } from '../helpers';
+import React, { useState } from 'react';
+import { observer } from 'mobx-react';
+import ConsoleModal from './ConsoleModal.jsx';
+import Calendar from './Calendar.jsx';
+import { request } from '../helpers/index.js';
+import store from '../store/index.js';
 
-class TodoForm extends Component {
-  constructor() {
-    super()
-    this.handleChange = this.handleChange.bind(this);
-    this.onSaveTodo = this.onSaveTodo.bind(this);
-    this.closeConsole = closeConsole.bind(this);
-    this.setTimestamp = this.setTimestamp.bind(this);
-    this.toggleCalendar = this.toggleCalendar.bind(this);
-    this.state = {
-      consoleMessage: '',
-      showCalendar: false,
-      link: {
-        url: '',
-        linkText: '',
-      },
-      todoObj: {
-        title: '',
-        description: '',
-        links: [],
-        deadline: 0,
-      },
-    }
-  };
+const TodoForm = (props) => {
+  const { updateTodoList } = props;
+  const [ state, setState ] = useState({
+    consoleMessage: '',
+    showCalendar: false,
+    link: {
+      url: '',
+      linkText: '',
+    },
+    todoObj: {
+      title: '',
+      description: '',
+      links: [],
+      deadline: 0,
+    },
+  });
 
-  handleChange(event) {
+  let disableSubmit;
+  const { consoleMessage, showCalendar, todoObj, link } = state;
+  const { title, description, links } = todoObj;
+  const { url, linkText } = link;
+  title && description ? disableSubmit = false : disableSubmit = true;
+
+  const handleChange = (event) => {
     const {name, value } = event.target;
-    this.setState({
-      ...this.state,
+    setState({
+      ...state,
       todoObj: {
-        ...this.state.todoObj,
-        [name]: value
-      }
-    });
-  };
-
-  handleEnterLink(event) {
-    const { name, value } = event.target;
-    this.setState({
-      link: {
-        ...this.state.link,
+        ...todoObj,
         [name]: value,
       }
     });
-  }
+  };
 
-  handleAddLink(event) {
+  const handleEnterLink = (event) => {
+    const { name, value } = event.target;
+    setState({
+      ...state,
+      link: {
+        ...state.link,
+        [name]: value,
+      }
+    });
+  };
+
+  const handleAddLink = (event) => {
     event.preventDefault();
-    this.setState({
-      ...this.state,
+    setState({
+      ...state,
       todoObj: {
-        ...this.state.todoObj,
-        links: [...this.state.todoObj.links, this.state.link],
+        ...todoObj,
+        links: [ ...links, link ],
       },
       link: {
+        ...state.link,
         linkText: '',
         url: '',
       },
     });
-  }
+  };
 
-  removeLink(event, index) {
+  const removeLink = (event, index) => {
     event.preventDefault();
-    this.state.todoObj.links.splice(index, 1);
-    this.setState({
-      ...this.state,
+    todoObj.links.splice(index, 1);
+    setState({
+      ...state,
       todoObj: {
-        ...this.state.todoObj,
-        links: [...this.state.todoObj.links],
+        ...state.todoObj,
+        links: [...state.todoObj.links],
       },
     });
-  }
+  };
 
-  async onSaveTodo(event) {
-    const todo = await request('/todos', 'POST', this.state.todoObj);
+  const onSaveTodo = async (event) => {
+    const todo = await request('/todos', 'POST', state.todoObj);
     if (todo.message) {
       const { message } = todo;
       let errorMessage = message;
       if (message === 'duplicate entry for unique key title') {
-        errorMessage = 'A todo with this title already exist'
+        errorMessage = 'A todo with this title already exist';
       }
-      this.setState({
-        consoleMessage: errorMessage
-      })
-      return null
-    }
-    this.props.todoStore.addTodo(todo);
+      setState({
+        ...state,
+        consoleMessage: errorMessage,
+      });
+      store.consoleMessage.setMessage(errorMessage);
+      return null;
+    };
 
     // Reset state
-    this.setState({
+    setState({
+      ...state,
+      consoleMessage: 'Task Saved!',
       todoObj: {
+      ...state.todoObj,
         title: '',
         description: '',
         links: [],
       },
-    })
+      link: {
+        url: '',
+        linkText: '',
+      },
+    });
+    store.consoleMessage.setMessage('Task Saved!');
+    updateTodoList(todo);
   };
 
-  setTimestamp(timestamp) {
-    this.setState({
-        todoObj: {
-          ...this.state.todoObj,
-          deadline: timestamp,
+  const setTimestamp = (timestamp) => {
+    setState({
+      ...state,
+      todoObj: {
+        ...state.todoObj,
+        deadline: timestamp,
       },
     });
   };
 
-  toggleCalendar(event) {
+  const toggleCalendar = (event) => {
     event.preventDefault();
-    this.setState({
-      ...this.state,
-      showCalendar: !this.state.showCalendar
-    })
-  }
-
-  render() {
-    let disableSubmit
-    const {
-      title,
-      description,
-      links
-    } = this.state.todoObj;
-    const { consoleMessage, showCalendar } = this.state;
-    title && description ? disableSubmit = false : disableSubmit = true;
-    return (
-      <div id="todo-form_container">
-        {consoleMessage &&
-          <ConsoleModal
-            message={consoleMessage}
-            closeConsole={this.closeConsole}
-          />
-        }
-        <form>
-          <div className="form-header">
-            <h3>Add a Task to Complete</h3>
-          </div>
-          <div className="form-group">
-            <label htmlFor="title">Add Title</label>
-            <span className="requiredFields">*</span><br />
-            <input
-              type="text"
-              id="title"
-              name="title"
-              placeholder='Title'
-              value={title}
-              onChange={this.handleChange}
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="description">Add Description</label>
-            <span className="requiredFields">*</span><br />
-            <input
-              type="text"
-              id="description"
-              name="description"
-              placeholder='Description'
-              value={description}
-              onChange={this.handleChange}
-            />
-          </div>
-          <div>{
-            links.map((link, index) => {
-              return (
-                <span key={index}>
-                  <button 
-                    onClick={event => this.removeLink(event, index)}
-                  >x
-                  </button>
-                  <a target="_blank" href={link.url}>{link.linkText || link.url}
-                  </a><br />
-                </span>
-              );
-            })
-          }</div>
-          <div className="form-group">
-            <fieldset>
-              <legend>
-                Add related links
-              </legend>
-              <input
-                type="text"
-                id="link-text"
-                name="linkText"
-                placeholder='Description'
-                value={this.state.link.linkText}
-                onChange={this.handleEnterLink.bind(this)}
-              />
-              <label htmlFor="description"> Link text</label><br />
-              <input
-                type="text"
-                id="link-url"
-                name="url"
-                placeholder='link'
-                value={this.state.link.url}
-                onChange={this.handleEnterLink.bind(this)}
-              />
-              <button
-                id="update-links"
-                onClick={this.handleAddLink.bind(this)}
-              >Add link</button>
-            </fieldset>
-          </div>
-          <div className="form-group">
-            <div id="add-deadline-btn">
-              <button onClick={this.toggleCalendar}>
-                {showCalendar? 'Hide Calendar': 'Add deadline'}
-              </button>
-            </div>
-            { showCalendar ? <Calendar getTimeStamp={this.setTimestamp} /> : null }
-          </div>
-          
-          <div className="form-group">
-            <button
-              type="button"
-              onClick={this.onSaveTodo}
-              disabled={disableSubmit}
-            >Save</button>
-          </div>
-        </form>
-      </div>
-    );
+    setState({
+      ...state,
+      showCalendar: !state.showCalendar,
+    });
   };
-}
 
-export default compose(
-  inject('todoStore'),
-  observer,
-)(TodoForm);
+  const resetConsole = () => {
+    setState({
+      ...state,
+      consoleMessage: '',
+    });
+  };
+
+  return (
+    <div id="todo-form_container">
+      {consoleMessage && <ConsoleModal resetConsole={resetConsole} />}
+      <form>
+        <div className="form-header">
+          <h3>Add a Task to Complete</h3>
+        </div>
+        <div className="form-group">
+          <label htmlFor="title">Add Title</label>
+          <span className="requiredFields">*</span><br />
+          <input
+            type="text"
+            id="title"
+            name="title"
+            placeholder='Title'
+            value={title}
+            onChange={handleChange}
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="description">Add Description</label>
+          <span className="requiredFields">*</span><br />
+          <input
+            type="text"
+            id="description"
+            name="description"
+            placeholder='Description'
+            value={description}
+            onChange={handleChange}
+          />
+        </div>
+        <div>{
+          links.map((link, index) => {
+            return (
+              <span key={index}>
+                <button 
+                  onClick={event => removeLink(event, index)}
+                >x
+                </button>
+                <a target="_blank" href={link.url}>{link.linkText || link.url}
+                </a><br />
+              </span>
+            );
+          })
+        }</div>
+        <div className="form-group">
+          <fieldset>
+            <legend>
+              Add related links
+            </legend>
+            <input
+              type="text"
+              id="link-text"
+              name="linkText"
+              placeholder='Description'
+              value={linkText}
+              onChange={handleEnterLink}
+            />
+            <label htmlFor="description"> Link text</label><br />
+            <input
+              type="text"
+              id="link-url"
+              name="url"
+              placeholder='link'
+              value={url}
+              onChange={handleEnterLink}
+            />
+            <button
+              id="update-links"
+              onClick={handleAddLink}
+            >Add link</button>
+          </fieldset>
+        </div>
+        <div className="form-group">
+          <div id="add-deadline-btn">
+            <button onClick={toggleCalendar}>
+              {showCalendar? 'Hide Calendar': 'Add deadline'}
+            </button>
+          </div>
+          { showCalendar ? <Calendar getTimeStamp={setTimestamp} /> : null }
+        </div>
+        
+        <div className="form-group">
+          <button
+            type="button"
+            id="save-button"
+            onClick={onSaveTodo}
+            disabled={disableSubmit}
+          >Save</button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+export default observer(TodoForm);

@@ -1,24 +1,19 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
-import Routes from './Routes.jsx';
-import { Provider } from 'mobx-react';
-import store from './store';
+import { createRoot } from 'react-dom/client';
+import Router from './Routes.jsx';
+import store from './store/index.js';
 import './styles/index.scss';
 
-const App = (props) => {
+const App = () => {
   return (
     <div>
-      <Routes>
-        <p>Welcome to your todo app</p>
-      </Routes>
+      <Router />
     </div>
   )
 }
 
-ReactDOM.render(
-<Provider {...store}>
-  <App />
-</Provider>,
-document.getElementById('app'));
+const domNode = document.getElementById('app');
+const root = createRoot(domNode);
+root.render(<App store={store} />)
 
 export default App;

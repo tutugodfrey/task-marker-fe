@@ -1,235 +1,252 @@
-import React, { Fragment } from 'react';
-import { observer, inject } from 'mobx-react';
-import { compose } from 'recompose';
+import React, { Fragment, useState, useEffect } from 'react';
+import { observer, } from 'mobx-react';
 import { Link } from 'react-router-dom';
-import { request } from '../helpers';
-import Navigation from './Navigation';
-import path from 'path';
+import { request, baseUrl } from '../helpers/index.js';
+import Navigation from './Navigation.jsx';
+import store from '../store/index.js';
 
-export class Profile extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      editMode: false,
-      editUser: {},
-      changeProfileImage: false,
-      photoLoaded: false,
-      photoUploadCompleted: false,
-      profileImage: '',
-      imageObj: {},
-    }
-    this.toggleEditMode = this.toggleEditMode.bind(this);
-    this.onEditText = this.onEditText.bind(this);
-    this.onSaveUpdate = this.onSaveUpdate.bind(this);
-    this.toggleChangeImageMode = this.toggleChangeImageMode.bind(this);
-    this.handlePhotoPreview = this.handlePhotoPreview.bind(this);
-    this.uploadPhoto = this.uploadPhoto.bind(this);
-  }
+const Profile = () => {
+  const [ state, setState ] = useState({
+    user: store.userStore.getUser,
+    editMode: false,
+    editUser: store.userStore.getUser,
+    changeProfileImage: false,
+    photoLoaded: false,
+    photoUploadCompleted: false,
+    oldProfileImage: '/profilePhotos/default-profile.png',
+    profileImage: '/profilePhotos/default-profile.png',
+    imageObj: {},
+  });
 
-  async componentWillMount() {
-    const user = this.props.userStore.getUser;
+  const {
+    user, editUser, editMode, changeProfileImage, photoLoaded, 
+    photoUploadCompleted, profileImage, oldProfileImage, imageObj,
+   } = state;
+   const { name, email, username, imgUrl } = user;
+   const { name: _name, email: _email, } = editUser;
+  const changeProfileBtnColor = changeProfileImage ? 'red': 'dark';
+  const showUploadBtn = photoLoaded ? 'show' : 'hide';
+
+  useEffect(() => {
+    async function fetchData() {
     if (!Object.keys(user).length) {
       const getUser = await request('/user', 'GET');
-      this.props.userStore.setUser(getUser);
+      store.userStore.setUser(getUser);
     }
-    this.setState({
-      ...this.state,
-      user,
-      editUser: this.props.userStore.getUser,
-    })
-  }
-  onEditText(event) {
-    const { name, value } = event.target;
-    this.setState({
-      ...this.state,
-      editUser: {
-        ...this.state.editUser,
-        [name]: value
-      }
-    })
-  }
-  toggleEditMode(event) {
-    this.setState({
-      ...this.state,
-      editMode: !this.state.editMode,
-    })
-  }
 
-  toggleChangeImageMode(event) {
-    this.setState({
-      ...this.state,
-      changeProfileImage: !this.state.changeProfileImage,
+    setState({
+      ...state,
+      editUser: store.userStore.getUser,
     });
-    const isPhotoLoaded = this.state.photoLoaded;
-    if (isPhotoLoaded) {
-      this.setState({
+    renderProfilePhoto(imgUrl);
+  }
+  fetchData();
+  }, [user]);
+  
+  const onEditText = (event) => {
+    const { name, value } = event.target;
+    setState({
+      ...state,
+      editUser: {
+        ...editUser,
+      [name]: value,
+      }
+    });
+  };
+
+  const toggleEditMode = (event) =>{
+    setState({
+      ...state,
+      editMode: !editMode,
+    });
+  };
+
+  const toggleChangeImageMode = (event) => {
+    if (photoLoaded) {
+      URL.revokeObjectURL(profileImage);
+      setState({
+        ...state,
         photoLoaded: false,
         imageObj: {},
-        profileImage: '',
+        profileImage: oldProfileImage,
+        changeProfileImage: !changeProfileImage,
       });
-      if (this.state.profileImage) {
-        URL.revokeObjectURL(this.state.profileImage)
-      }
-    }
-  }
+    } else {
+      setState({
+        ...state,
+        changeProfileImage: !changeProfileImage,
+      });
+    };
+  };
 
-  async handlePhotoPreview(event) {
+  const handlePhotoPreview = async (event) => {
     const image =  event.target.files[0];
-    if (this.state.profileImage) {
-      URL.revokeObjectURL(this.state.profileImage)
-    }
-    const url = URL.createObjectURL(image)
-    this.setState({
+    const _profileImage = profileImage;
+    const url = URL.createObjectURL(image);
+    setState({
+      ...state,
+      oldProfileImage: _profileImage,
       profileImage: url,
       photoLoaded: true,
       imageObj: image,
     });
-  }
+  };
 
-  async uploadPhoto(event) {
+  const uploadPhoto = async (event) => {
     const formData = new FormData();
-    formData.append('profilePhoto', this.state.imageObj);
+    formData.append('profilePhoto', imageObj);
     const res = await request('/users/photo', 'POST', formData);
     if (res.name) {
-      this.props.userStore.setUser(res);
-      this.setState({
-        ...this.state,
+      setState({
+        ...state,
         photoUploadCompleted: true,
+      });
+      store.userStore.setUser(res);
+      completePhotoUpload();
+    };
+  };
+
+  const completePhotoUpload = () => {
+    setTimeout(() => {
+      setState({
+        ...state,
+        photoUploadCompleted: false,
         photoLoaded: false,
         changeProfileImage: false,
       });
 
-      setTimeout(() => {
-        this.setState({
-          ...this.state,
-          photoUploadCompleted: false,
-        });
-      }, 5000)
-    }
-  }
+    }, 3000);
+  };
 
-  async onSaveUpdate(event) {
-    const updatedUser = await request('/users', 'PUT', this.state.editUser);
-    this.props.userStore.setUser(updatedUser);
-    this.setState({
-      ...this.state,
-      editMode: false,
-    })
-  }
-  render() {
-    const user = this.props.userStore.getUser;
-    const { imgUrl } = user;
-    const { name, email } = this.state.editUser;
-    const { changeProfileImage, photoLoaded, photoUploadCompleted } = this.state;
-    const changeProfileBtnColor = changeProfileImage ? 'red': 'dark';
-    const showUploadBtn = photoLoaded ? 'show' : 'hide';
-    return (
-      <div>
-        <Navigation />
-        <div className="back-link_div">
-          <Link to="/dashboard">&laquo; Back</Link>
-        </div>
-        <div id="profile-page">
-          {this.state.editMode && (
-            <div id="edit-profile">
-              <div className="profile-image_div">
-                <img src={imgUrl || "public/profilePhotos/default-profile.png"}/>
+  const onSaveUpdate = async (event) => {
+    const user_ = { ...editUser };
+    delete user_.token;
+    const updatedUser = await request('/users', 'PUT', user_);
+    if (!updatedUser.message) {
+      store.userStore.setUser(updatedUser);
+      setState({
+        ...state,
+        user: store.userStore.getUser,
+        editMode: false,
+      });
+    };
+  };
+
+  const renderProfilePhoto = (imgUrl_) => {
+    if (imgUrl_) {
+      const splitedBaseUrl = baseUrl.split('/');
+      const newBaseUrl = `${splitedBaseUrl[0]}//${splitedBaseUrl[2]}`;
+      const newImgUrl = imgUrl_.replace('public', newBaseUrl);
+      setState({
+        ...state,
+        profileImage: newImgUrl,
+      });
+    };
+  };
+
+  return (
+    <div>
+      <Navigation />
+      <div className="back-link_div">
+        <Link to="/dashboard">&laquo; Back</Link>
+      </div>
+      <div id="profile-page">
+        {editMode && (
+          <div id="edit-profile">
+            <div className="profile-image_div">
+              <img src={ profileImage }/>
+            </div>
+            <div className="input-group">
+              <label>Name:</label>
+              <input
+                type="text"
+                name="name"
+                value={_name}
+                onChange={onEditText}
+              />
+            </div>
+            <div className="input-group">
+              <label>Email:</label>
+              <input
+                type="text"
+                name="email"
+                value={_email}
+                onChange={onEditText}
+              />
+            </div>
+            <div id="btn-group">
+              <div>
+                <button type="button" id="save-edit" onClick={onSaveUpdate}
+                >Save</button>
               </div>
-              <div className="input-group">
-                <label>Name:</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={name}
-                  onChange={this.onEditText}
-                />
-              </div>
-              <div className="input-group">
-                <label>Email:</label>
-                <input
-                  type="text"
-                  name="email"
-                  value={email}
-                  onChange={this.onEditText}
-                />
-              </div>
-              <div id="btn-group">
-                <div>
-                  <button type="button" id="save-edit" onClick={this.onSaveUpdate}
-                  >Save</button>
-                </div>
-                <div>
-                  <button type="button" id="cancel-edit" onClick={this.toggleEditMode}
-                  >Cancel</button>
-                </div>
+              <div>
+                <button type="button" id="cancel-edit" onClick={toggleEditMode}
+                >Cancel</button>
               </div>
             </div>
-          )}
-          {!this.state.editMode && (
-            <div id="profile-info">
-              <div id="profile-header_div">
-                <h3>{user.name}</h3>
-              </div>
-              <div className="profile-image_div" id="profile-image_div">
-                {photoUploadCompleted && 
-                <span
-                  id="profile-photo-save-success"
-                  className="pop-up">Profile picture have been saved!
-                </span>}
+          </div>
+        )}
+        {!editMode && (
+          <div id="profile-info">
+            <div id="profile-header_div">
+              <h3>{name}</h3>
+            </div>
+            <div className="profile-image_div" id="profile-image_div">
+              {photoUploadCompleted && 
+              <span
+                id="profile-photo-save-success"
+                className="pop-up">Profile picture have been saved!
+              </span>}
+              <Fragment>
+                <img
+                  src={ profileImage }
+                />
+                <br />
+              </Fragment>
+              { photoLoaded &&
+                <button
+                  className={showUploadBtn}
+                  onClick={uploadPhoto}>Upload
+                </button>}
+              <br />
+              { changeProfileImage && 
                 <Fragment>
-                  <img
-                    src={ this.state.profileImage || imgUrl || 'public/profilePhotos/default-profile.png'}
+                  <input
+                    type='file'
+                    name='profile-photo'
+                    onChange={handlePhotoPreview}
                   />
                   <br />
-                </Fragment>
-                {photoLoaded &&
-                  <button
-                    className={showUploadBtn}
-                    onClick={this.uploadPhoto}>Upload
-                  </button>}
-                <br />
-                {changeProfileImage && 
-                  <Fragment>
-                    <input
-                      type='file'
-                      name='profile-photo'
-                      onChange={this.handlePhotoPreview}
-                    />
-                    <br />
-                  </Fragment>}
-                <button
-                  id="change-profile-photo"
-                  className={changeProfileBtnColor}
-                  onClick={this.toggleChangeImageMode}
-                >
-                  {changeProfileImage? "Cancle" : "Change"}
-                </button>
-                <img src={user.imgUser || 'public/profilePhotos/default-profile.png'} />
-              </div>
-              <div className="profile-details">
-                <div><strong>Email:</strong></div>
-                <div><span>{user.email}</span></div>
-              </div>
-              <div className="profile-details">
-                <div><strong>Username:</strong></div>
-                <div><span>{user.username}</span></div>
-              </div>
-              <div id="edit-profile-btn_div">
-                <button
-                  type="button"
-                  onClick={this.toggleEditMode}
-                >
-                  Edit
-                </button>
-              </div>
+                </Fragment>}
+              <button
+                id="change-profile-photo"
+                className={changeProfileBtnColor}
+                onClick={toggleChangeImageMode}
+              >
+                { changeProfileImage ? "Cancel" : "Change" }
+              </button>
             </div>
-          )}
-        </div>
+            <div className="profile-details">
+              <div><strong>Email:</strong></div>
+              <div><span>{email}</span></div>
+            </div>
+            <div className="profile-details">
+              <div><strong>Username:</strong></div>
+              <div><span>{username}</span></div>
+            </div>
+            <div id="edit-profile-btn_div">
+              <button
+                type="button"
+                onClick={toggleEditMode}
+              >
+                Edit
+              </button>
+            </div>
+          </div>
+        )}
       </div>
-    );
-  }
+    </div>
+  );
 }
-export default compose(
-  inject('userStore'),
-  observer,
-)(Profile);
+
+export default observer(Profile);

@@ -29,18 +29,18 @@ const Profile = () => {
 
   useEffect(() => {
     async function fetchData() {
-    if (!Object.keys(user).length) {
-      const getUser = await request('/user', 'GET');
-      store.userStore.setUser(getUser);
-    }
+      if (!Object.keys(user).length) {
+        const getUser = await request('/user', 'GET');
+        store.userStore.setUser(getUser);
+      }
 
-    setState({
-      ...state,
-      editUser: store.userStore.getUser,
-    });
-    renderProfilePhoto(imgUrl);
-  }
-  fetchData();
+      setState({
+        ...state,
+        editUser: store.userStore.getUser,
+      });
+      renderProfilePhoto(imgUrl);
+    }
+    fetchData();
   }, [user]);
   
   const onEditText = (event) => {
@@ -133,6 +133,8 @@ const Profile = () => {
   };
 
   const renderProfilePhoto = (imgUrl_) => {
+    console.log('Image Url', imgUrl_);
+    console.log('Base Url', baseUrl)
     if (imgUrl_) {
       const splitedBaseUrl = baseUrl.split('/');
       const newBaseUrl = `${splitedBaseUrl[0]}//${splitedBaseUrl[2]}`;

@@ -23,7 +23,7 @@ export default () => {
     output: {
       path: path.join(__dirname, 'public'),
       filename: 'bundle.js',
-      publicPath: '/',
+      publicPath: 'public',
     },
     module: {
       rules: [

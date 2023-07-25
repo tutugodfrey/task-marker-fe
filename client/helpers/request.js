@@ -1,6 +1,7 @@
 // import fetch from 'isomorphic-fetch';
 const baseUrl = process.env.API_URL || 'http://localhost:3005/api';
 const request = async (route, method = 'GET', data = {}) => {
+  console.log(baseUrl)
   try {
     let res
     if (method === 'GET') {

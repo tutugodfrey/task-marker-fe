@@ -109,7 +109,7 @@ jobs:
             export "$(grep ENVIRONMENT ~/.env)"
             echo $DOCKER_HUB_PASS | docker login -u $DOCKER_USER --password-stdin
             . ./docker-helper.sh
-            build_image_fe /api ${ENVIRONMENT}-${CIRCLE_BUILD_NUM}
+            build_image_fe ${BACKEND_SERVICE} ${ENVIRONMENT}-${CIRCLE_BUILD_NUM}
             push_image ${ENVIRONMENT}-${CIRCLE_BUILD_NUM}
 
 workflows:

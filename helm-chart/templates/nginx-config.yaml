@@ -46,8 +46,11 @@ data:
         }
 
         location / {
-        
+          if (!-e $request_filename) {
+            rewrite ^(.*)$ /index.html break;
+          }
         }
+
         error_page 404 /404.html;
         location = /40x.html {
         }

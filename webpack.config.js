@@ -54,9 +54,8 @@ export default () => {
       ]
     },
     devServer: {
-      // inline: true,
       port: 3000,
-      historyApiFallback: true
+      historyApiFallback: true,
     },
     resolve: {
       extensions: ['.js', '.jsx']

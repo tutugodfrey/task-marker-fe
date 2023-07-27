@@ -7,9 +7,9 @@ import store from '../store/index.js';
 
 const Profile = () => {
   const [ state, setState ] = useState({
-    user: store.userStore.getUser,
+    user: {},
     editMode: false,
-    editUser: store.userStore.getUser,
+    editUser: {},
     changeProfileImage: false,
     photoLoaded: false,
     photoUploadCompleted: false,
@@ -28,17 +28,24 @@ const Profile = () => {
   const showUploadBtn = photoLoaded ? 'show' : 'hide';
 
   useEffect(() => {
+    const user_ = store.userStore.getUser;
     async function fetchData() {
-      if (!Object.keys(user).length) {
+      if (!Object.keys(user_).length) {
         const getUser = await request('/user', 'GET');
         store.userStore.setUser(getUser);
+        setState({
+          ...state,
+          user: user_,
+          editUser: user_,
+        });
+      } else {
+        setState({
+          ...state,
+          user: store.userStore.getUser,
+          editUser: store.userStore.getUser,
+        });
+        renderProfilePhoto(imgUrl);
       }
-
-      setState({
-        ...state,
-        editUser: store.userStore.getUser,
-      });
-      renderProfilePhoto(imgUrl);
     }
     fetchData();
   }, [user]);

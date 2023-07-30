@@ -1,13 +1,8 @@
 import React from 'react';
-// import { useNavigate } from 'react-router-dom';
 import Navigation from './Navigation.jsx';
 import LoginInline from './LoginInline.jsx';
 
 const Home = () =>  {
-  // function navigate(route, useNavigate) {
-  //   const navigate = useNavigate();
-  //   navigate(route)
-  // }
   return (
     <div id="landing">
         <Navigation />
@@ -21,7 +16,7 @@ const Home = () =>  {
         </div>
       </div>
     </div>
-  )};
-
+  );
+};
 
 export default Home;

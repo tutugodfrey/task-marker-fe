@@ -12,9 +12,6 @@ const { todo1, todo2 } = testTodos;
 todo1.id = 1;
 const todos = [todo1];
 let wrapper;
-let wrapper2
-
-let count = 0
 
 // this is needed to suppress warning
 // Warning: An update to Todo inside a test was not wrapped in act(...)
@@ -31,24 +28,33 @@ describe('Todo test', () => {
   describe('Top level div', () => {
     fetch.mockResponseOnce(JSON.stringify([]))
     beforeAll(() => {
-      wrapper = mount(<Todo />);
+      localStorage.setItem('token', 'thisisatokenstring')
+      wrapper = mount(<BrowserRouter><Todo /></BrowserRouter>);
       waitForComponentToPaint(wrapper);
     });
 
+    test('should have NavBar Component', () => {
+      expect(wrapper.children().at(0).name()).toBe('Router');
+      expect(wrapper.children().childAt(0).children().childAt(0).name()).toBe('Navigation');
+      expect(wrapper.children().childAt(0).children().childAt(0).children().children().length).toBe(4);
+      const navBar = wrapper.children().childAt(0).children().childAt(0).children();
+      expect(navBar.childAt(0).prop('id')).toBe('home');
+      expect(navBar.childAt(0).find('a').props().children).toBe('Home');
+      expect(navBar.childAt(0).find('a').props().href).toBe('/');
+      expect(navBar.childAt(1).prop('id')).toBe('tasks');
+      expect(navBar.childAt(1).find('a').props().children).toBe('Tasks');
+      expect(navBar.childAt(1).find('a').props().href).toBe('/tasks');
+    });
+
     test('should have id todos-container', () => {
-      // console.log(wrapper.type())
-      // setTimeout(() => {
-        expect(wrapper.name()).toBe('Memo(Todo)');
-        expect(wrapper.childAt(0).name()).toBe('div');
-        expect(wrapper.childAt(0).props().id).toEqual('todos-container');
-        expect(wrapper.childAt(0).at(0).children().length).toBe(2);
-        // done()
-      // })
+      expect(wrapper.children().childAt(0).children().childAt(1).name()).toBe('div');
+      expect(wrapper.children().childAt(0).children().childAt(1).props().id).toBe('todos-container');
+      expect(wrapper.children().childAt(0).children().childAt(1).children().length).toBe(2);
     });
 
     test('should render the todo form', () => {
-      expect(wrapper.childAt(0).children().at(0).name()).toBe('div');
-      expect(wrapper.childAt(0).children().at(0).props().id).toBe('todo-form_control');
+      expect(wrapper.children().childAt(0).children().childAt(1).children().at(0).name()).toBe('div');
+      expect(wrapper.children().childAt(0).children().childAt(1).children().at(0).props().id).toBe('todo-form_control');
 
       const formElement = wrapper.childAt(0).children().at(0).find('form')
       expect(formElement.children().length).toBe(7);
@@ -97,9 +103,9 @@ describe('Todo test', () => {
     });
 
     test('Should render the todos container', () => {
-      expect(wrapper.childAt(0).children().at(1).name()).toBe('div');
-      expect(wrapper.childAt(0).children().at(1).props().id).toBe('todos-content_div');
-      expect(wrapper.childAt(0).children().at(1).find('h3').text()).toBe('No Todos! Start adding your tasks');
+      expect(wrapper.children().childAt(0).children().childAt(1).children().at(1).name()).toBe('div');
+      expect(wrapper.children().childAt(0).children().childAt(1).children().at(1).props().id).toBe('todos-content_div');
+      expect(wrapper.children().childAt(0).children().childAt(1).children().at(1).find('h3').text()).toBe('No Todos! Start adding your tasks');
     });
   });
 
@@ -107,30 +113,48 @@ describe('Todo test', () => {
     fetch.resetMocks()
     fetch.mockResponseOnce(JSON.stringify([ todo1 ]))
     beforeAll(() => {
-        wrapper = mount(<Todo />);
+        localStorage.setItem('token', 'thisisatokenstring')
+        wrapper = mount(<BrowserRouter><Todo /></BrowserRouter>);
+    });
+
+    test('Should render the NavBar', (done) => {
+      setTimeout(() => {
+        wrapper.update()
+        expect(wrapper.children().childAt(0).children().childAt(0).name()).toBe('Navigation');
+        expect(wrapper.children().childAt(0).children().childAt(0).children().children().length).toBe(4);
+        const navBar = wrapper.children().childAt(0).children().childAt(0).children();
+        expect(navBar.childAt(0).prop('id')).toBe('home');
+        expect(navBar.childAt(0).find('a').props().children).toBe('Home');
+        expect(navBar.childAt(0).find('a').props().href).toBe('/');
+        expect(navBar.childAt(1).prop('id')).toBe('tasks');
+        expect(navBar.childAt(1).find('a').props().children).toBe('Tasks');
+        expect(navBar.childAt(1).find('a').props().href).toBe('/tasks');
+        done();
+      });
     });
 
     test('Todo form should not be displayed', (done) => {
       setTimeout(() => {
-        wrapper.update();
-        expect(wrapper.childAt(0).children().at(0).name()).toBe('div');
-        expect(wrapper.childAt(0).children().at(0).prop('id')).toBe('todo-form_control');
-        expect(wrapper.childAt(0).children().at(0).find('form').length).toBe(0);
+        expect(wrapper.children().childAt(0).children().childAt(1).children().at(0).name()).toBe('div');
+        expect(wrapper.children().childAt(0).children().childAt(1).children().at(0).props().id).toBe('todo-form_control');
+        expect(wrapper.children().childAt(0).children().childAt(1).children().at(0).find('form').length).toBe(0);
         done();
       });
     });
 
     test('There should be "Add Task" botton', () => {
-      expect(wrapper.childAt(0).children().at(0).children().childAt(0).name()).toBe('button');
-      expect(wrapper.childAt(0).children().at(0).children().childAt(0).text()).toBe('Add Task');
+      const toggleTodoDiv = wrapper.childAt(0).children().children().childAt(1).find('#toggle-todo-form_div');
+      expect(toggleTodoDiv.childAt(0).name()).toBe('button');
+      expect(toggleTodoDiv.children().childAt(0).text()).toBe('Add Task');
     });
 
     test('Should contain todos', () => {
-      expect(wrapper.childAt(0).children().at(1).children().at(0).text()).toBe('Your Todos');
-      expect(wrapper.childAt(0).children().at(1).children().at(0).name()).toBe('h3');
+      const todosContainer = wrapper.childAt(0).children().childAt(0).childAt(1).childAt(1);
+      expect(todosContainer.childAt(0).text()).toBe('Your Todos');
+      expect(todosContainer.childAt(0).name()).toBe('h3');
 
-      expect(wrapper.childAt(0).children().at(1).children().at(1).name()).toBe('ul');
-      expect(wrapper.childAt(0).children().at(1).children().at(1).children().length).toBe(1);
+      expect(todosContainer.childAt(1).name()).toBe('ul');
+      expect(todosContainer.childAt(1).children().length).toBe(1);
     });
 
     test('Should toggle the todo form', () => {
@@ -149,9 +173,9 @@ describe('Todo test', () => {
     test('Todo items should be successfully added', (done) => {
       fetch.resetMocks();
       fetch.mockResponseOnce(JSON.stringify(todo2));
-      
-      wrapper.update();
-      wrapper.childAt(0).children().at(0).children().childAt(0).simulate('click');
+
+      const toggleTodoDiv = wrapper.childAt(0).children().children().childAt(1).find('#toggle-todo-form_div');
+      toggleTodoDiv.childAt(0).find('button').simulate('click');
 
       const formElement = wrapper.childAt(0).children().at(0).find('form')
       formElement.find('#title').simulate('change', {
@@ -193,6 +217,9 @@ describe('Todo test', () => {
       });
     }, 3000);
   });
+});
+
+
 
 
 
@@ -256,4 +283,4 @@ describe('Todo test', () => {
     //   expect(links.at(1).childAt(1).props().children).toBe(todo1.links[1].linkText);
     // });
   // });
-});
+

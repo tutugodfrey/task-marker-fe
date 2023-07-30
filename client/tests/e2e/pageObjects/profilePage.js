@@ -3,12 +3,12 @@ import { testUsers } from '../../../../helpers/index.js';
 
 const image_to_upload =  process.env.IMAGE_UPLOAD || '/Users/godfreytutu/Desktop/projects/task-marker-fe/public/uploads/profilePhoto-1.jpg'
 const base = Base();
-const { dashboard, profile } = selectors;
+const { tasks, profile } = selectors;
 const { editUser1 } = testUsers;
 
 export default {
   navToProfile: async () => {
-    await base.find(dashboard.profileLink).click();
+    await base.find(tasks.profileLink).click();
     await base.waitUntilPageLoad('/profile');
     await base.driver.sleep(300)
     const name = await base.find(profile.profileHeader).getText();

@@ -4,6 +4,13 @@ import { observer } from 'mobx-react';
 import store from '../store/index.js';
 import ConsoleModal from './ConsoleModal.jsx';
 import { request } from '../helpers/index.js';
+import{ ROUTES } from '../constants/index.js';
+
+const { 
+  SIGN_IN,
+  TASKS,
+  BASE_ROUTE,
+} = ROUTES;
 
 const Signup = () => {
   const navigate = useNavigate()
@@ -89,7 +96,7 @@ const Signup = () => {
       }
       localStorage.setItem('token', createdUser.token)
       store.userStore.setUser(createdUser)  
-      navigate('/dashboard')
+      navigate(TASKS)
     };
   };
 
@@ -103,7 +110,7 @@ const Signup = () => {
   return (
     <div id="signup-page">
       <div className="back-link_div">
-        <Link to="/">&laquo; Back</Link>
+        <Link to={BASE_ROUTE}>&laquo; Back</Link>
       </div>
       <div className="sign-up">
         {consoleMessage &&  <ConsoleModal resetConsole={resetConsole} /> }
@@ -195,7 +202,7 @@ const Signup = () => {
         </form>
         <div>
           <p>I already have an account? 
-            <Link to="/signin">Sign In</Link>
+            <Link to={SIGN_IN}>Sign In</Link>
           </p>
         </div>
       </div>

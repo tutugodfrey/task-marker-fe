@@ -7,7 +7,7 @@ import {
   landingPage,
   signupPage,
   signinPage,
-  dashboard,
+  tasks,
   profilePage,
 } from './pageObjects/index.js';
 
@@ -20,18 +20,18 @@ let landing;
 let { WEB_URL } = process.env;
 WEB_URL = WEB_URL || 'http://localhost:3000'
 describe('Integration testing', () => {
-    before(async (done) => {
+    before(async function () {
+      this.timeout(60000)
       base.visit(WEB_URL);
       base.driver.manage().window().maximize(100);
-      base.driver.sleep(4000);
-      done()
+      await base.driver.sleep(6000);
     });
 
-    after(async (done) => {
-      base.driver.sleep(6000);
+    after(async function () {
+      this.timeout(60000)
+      await base.driver.sleep(4000);
       base.quit();
-      done()
-    }, 40000);
+    });
 
     it('shoulld tests something', async () => {
       landing = await landingPage.pageElements();
@@ -53,16 +53,16 @@ describe('Integration testing', () => {
       return signupPage.signUp();
     }).timeout(10000);
 
-    it('should test dashboard', async () => {      
-      const dashboardPage = await dashboard.scanningPage();
+    it('should test tasks', async () => {      
+      const tasksPage = await tasks.scanningPage();
       await base.driver.sleep(300)
-      expect(dashboardPage.homeLink).to.equal('Home');
-      expect(dashboardPage.tasksLink).to.equal('Tasks');
-      expect(dashboardPage.profileLink).to.equal('Profile');
-      expect(dashboardPage.logoutLink).to.equal('Log Out');
-      expect(dashboardPage.formHeader).to.equal('Add a Task to Complete');
-      expect(dashboardPage.contentHeader).to.equal('No Todos! Start adding your tasks');
-      const createTask = await dashboard.createTask();
+      expect(tasksPage.homeLink).to.equal('Home');
+      expect(tasksPage.tasksLink).to.equal('Tasks');
+      expect(tasksPage.profileLink).to.equal('Profile');
+      expect(tasksPage.logoutLink).to.equal('Log Out');
+      expect(tasksPage.formHeader).to.equal('Add a Task to Complete');
+      expect(tasksPage.contentHeader).to.equal('No Todos! Start adding your tasks');
+      const createTask = await tasks.createTask();
       await base.driver.sleep(300)
       expect(1).to.equal(1)
       expect(createTask.contentHeader).to.equal('Your Todos');
@@ -70,7 +70,7 @@ describe('Integration testing', () => {
     }).timeout(10000);
 
     it('should check todo expanded card', async () => {
-      const taskContentCard = await dashboard.taskContentCard();
+      const taskContentCard = await tasks.taskContentCard();
       const deadline = taskContentCard.deadline.split(' ');
       expect(taskContentCard.taskTitle).to.equal('todo1 title');
 
@@ -109,7 +109,7 @@ describe('Integration testing', () => {
     }).timeout(10000);
 
     it('should logout user', () => {
-      return dashboard.logOut();
+      return tasks.logOut();
     });
 
     it('should log user in', async () => {
@@ -118,8 +118,8 @@ describe('Integration testing', () => {
     });
 
     it('should logout user', async () => {
-      await base.waitUntilPageLoad('/dashboard');
-      await dashboard.logOut();
+      await base.waitUntilPageLoad('/tasks');
+      await tasks.logOut();
       return base.back();
     });
 

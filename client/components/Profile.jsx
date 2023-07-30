@@ -7,9 +7,9 @@ import store from '../store/index.js';
 
 const Profile = () => {
   const [ state, setState ] = useState({
-    user: {},
+    user: store.userStore.getUser,
     editMode: false,
-    editUser: {},
+    editUser: store.userStore.getUser,
     changeProfileImage: false,
     photoLoaded: false,
     photoUploadCompleted: false,
@@ -35,17 +35,15 @@ const Profile = () => {
         store.userStore.setUser(getUser);
         setState({
           ...state,
-          user: user_,
-          editUser: user_,
+          user: {
+            ...getUser
+          },
+          editUser: {
+            ...getUser
+          },
         });
-      } else {
-        setState({
-          ...state,
-          user: store.userStore.getUser,
-          editUser: store.userStore.getUser,
-        });
-        renderProfilePhoto(imgUrl);
       }
+      renderProfilePhoto(imgUrl);
     }
     fetchData();
   }, [user]);

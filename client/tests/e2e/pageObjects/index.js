@@ -1,4 +1,4 @@
-import dashboard from './dashboard.js';
+import tasks from './tasks.js';
 import signupPage from './signup.js';
 import landingPage from './landingPage.js';
 import profilePage from './profilePage.js';
@@ -10,7 +10,7 @@ export {
   landingPage,
   signupPage,
   signinPage,
-  dashboard,
+  tasks,
   profilePage,
   selectors,
   Base,

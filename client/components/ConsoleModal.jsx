@@ -8,6 +8,8 @@ const ConsoleModal = observer((props) => {
     message: ''
   });
 
+  const { message } = state;
+
   function closeConsole (event) {
     store.consoleMessage.updateMessage('');
     setState({
@@ -33,7 +35,7 @@ const ConsoleModal = observer((props) => {
         state.message && (
           <div id="console-modal">
             <button onClick={closeConsole}>x</button>
-            <p>{state.message}</p>
+            <p>{message}</p>
           </div>
         )
       }

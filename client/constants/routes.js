@@ -4,4 +4,5 @@ export default {
   SIGN_IN: '/signin',
   DASHBOARD: '/dashboard',
   PROFILE: '/profile',
+  TASKS: '/tasks',
 }

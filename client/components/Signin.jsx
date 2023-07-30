@@ -8,7 +8,7 @@ import{ ROUTES } from '../constants/index.js';
 
 const { 
   SIGN_UP,
-  DASHBOARD,
+  TASKS,
   BASE_ROUTE,
 } = ROUTES;
 
@@ -65,7 +65,7 @@ const SignIn = () => {
       }
       localStorage.setItem('token', createdUser.token);
       store.userStore.setUser(createdUser);
-      navigate(DASHBOARD);
+      navigate(TASKS);
     }
   }
 

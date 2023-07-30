@@ -1,6 +1,11 @@
 #landing {
   #nav-bar {
     background: none;
+    div {
+      a {
+        color: $primaryColor;
+      }
+    }
   }
   background: url('public/background-image.jpg');
   // background: url('background-image.jpg');

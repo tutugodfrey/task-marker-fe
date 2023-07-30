@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import TodoForm from './TodoForm.jsx';
 import Calendar from './Calendar.jsx';
+import Navigation from './Navigation.jsx';
 import { observer, } from 'mobx-react';
 import { request } from '../helpers/index.js';
 import store from '../store/index.js';
@@ -212,192 +213,195 @@ const Todo = (props) => {
   };
 
   return (
-    <div id="todos-container">
-      <div id="todo-form_control">
-        <div id="toggle-todo-form_div">
-          {todos.length ? (
-            <button
-              id='toggle-todoform_button'
-              onClick={toggleTodoForm}
-            >
-              {showTodoForm ? 'Close Form': 'Add Task'}
-            </button>
-          ) : null}
+    <div>
+      <Navigation />
+      <div id="todos-container">
+        <div id="todo-form_control">
+          <div id="toggle-todo-form_div">
+            {todos.length ? (
+              <button
+                id='toggle-todoform_button'
+                onClick={toggleTodoForm}
+              >
+                {showTodoForm ? 'Close Form': 'Add Task'}
+              </button>
+            ) : null}
+          </div>
+          { (!todos.length || showTodoForm) && <TodoForm updateTodoList={updateTodoList} /> }
         </div>
-        { (!todos.length || showTodoForm) && <TodoForm updateTodoList={updateTodoList} /> }
-      </div>
-      <div id="todos-content_div">
-        <h3>{ todos.length ? 'Your Todos' : 'No Todos! Start adding your tasks' }</h3>
-        <ul>
-        {todos && todos.map((mainTodo, todoIndex) => {
-          let editing;
-          let todo;
-          if (editMode && todoToEdit.id === mainTodo.id) {
-            editing = true,
-            todo = todoToEdit
-          } else {
-            editing = false;
-            todo = mainTodo
-          }
-          return (
-            <div className="todo" key={todo.id}>
-              <div className="todo-bar">
-                <div
-                  id={`toggle-todo-${todo.id}-mini`}
-                  className="visible mini-todo-content"
-                >
-                  <div className="todo-bar_title">{todo.title}</div>
+        <div id="todos-content_div">
+          <h3>{ todos.length ? 'Your Todos' : 'No Todos! Start adding your tasks' }</h3>
+          <ul>
+          {todos && todos.map((mainTodo, todoIndex) => {
+            let editing;
+            let todo;
+            if (editMode && todoToEdit.id === mainTodo.id) {
+              editing = true,
+              todo = todoToEdit
+            } else {
+              editing = false;
+              todo = mainTodo
+            }
+            return (
+              <div className="todo" key={todo.id}>
+                <div className="todo-bar">
+                  <div
+                    id={`toggle-todo-${todo.id}-mini`}
+                    className="visible mini-todo-content"
+                  >
+                    <div className="todo-bar_title">{todo.title}</div>
+                    <div>
+                      {todo.completed &&
+                        <input
+                          id={`todo-${todo.id}`}
+                          type="checkbox"
+                          checked={todo.completed}
+                          onChange={event => toggleCompleted(event, todoIndex)}
+                        />
+                      }
+                    </div>
+                  </div>
                   <div>
-                    {todo.completed &&
+                    <button
+                      id={`toggle-todo-${todo.id}`}
+                      onClick={(event) => toggleTodoDisplay(event, todoIndex)}
+                    >Show</button>
+                  </div>
+                </div>
+                <div id={`toggle-todo-${todo.id}-main`} className={'hide-item todos'}>
+                  <li key={todo.id}>
+                    <div>
+                      <div>
+                      {editing ?
+                        <div id={editingTodo}>
+                          <label className="item-label">Title: </label>
+                          <input
+                            value={todo.title}
+                            name="title"
+                            onChange={handleAddChange}
+                          />
+                        </div>
+                          : <h3>{todo.title}</h3>
+                        }
+                      </div>
+                      <div>
+                      { editing ?
+                        <div>
+                          <label className="item-label">Description: </label>
+                          <input
+                            name="description"
+                            value={todo.description}
+                            onChange={handleAddChange}
+                          />
+                        </div>
+                          : <p>{todo.description}</p>
+                        }
+                      </div>
+                      <div id="links-div" className={editingTodo}>
+                        <strong className="item-label">{todo.links && todo.links.length ? 'Links' : null}</strong>
+                        <div>{todo.links && todo.links.length && todo.links.map((link, index)=> {
+                          return (
+                            <span key={index}>
+                              {editing && <button
+                                onClick={event => removeLink(event, index)}
+                              >x</button>}
+                              <a href={link.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >{link.linkText || link.url}
+                              </a><br />
+                            </span>
+                          );
+                        }) || null}
+                        </div>
+                      </div>
+
+                      <div id="deadline">
+                        {
+                        todo.deadline? <div>
+                            <strong>Target date</strong>
+                            <div>{formatDate(todo.deadline)}</div>
+                          </div> : null
+                        }
+                        <div>
+                          <div id="edit-deadline">
+                            {editing?
+                              <button onClick={event => toggleEditModeCalendar(event, todo)}>
+                                {todo.openCalendarEditInMode? 'Close Calendar' :
+                                  todo.deadline ? 'Chagne deadline' : 'Add deadline' }
+                              </button> : null }
+                          </div>
+                        </div>
+                      </div>
+
+                      { todo.openCalendarEditInMode? <Calendar timestamp={todo.deadline} getTimeStamp={setTimestamp} /> : null }
+                      <div id="check-complete">
                       <input
                         id={`todo-${todo.id}`}
                         type="checkbox"
                         checked={todo.completed}
                         onChange={event => toggleCompleted(event, todoIndex)}
                       />
-                    }
-                  </div>
-                </div>
-                <div>
-                  <button
-                    id={`toggle-todo-${todo.id}`}
-                    onClick={(event) => toggleTodoDisplay(event, todoIndex)}
-                  >Show</button>
-                </div>
-              </div>
-              <div id={`toggle-todo-${todo.id}-main`} className={'hide-item todos'}>
-                <li key={todo.id}>
-                  <div>
-                    <div>
-                    {editing ?
-                      <div id={editingTodo}>
-                        <label className="item-label">Title: </label>
-                        <input
-                          value={todo.title}
-                          name="title"
-                          onChange={handleAddChange}
-                        />
+                      <label htmlFor={`todo-${todo.id}`}> Completed</label>
                       </div>
-                        : <h3>{todo.title}</h3>
-                      }
-                    </div>
-                    <div>
-                    { editing ?
-                      <div>
-                        <label className="item-label">Description: </label>
-                        <input
-                          name="description"
-                          value={todo.description}
-                          onChange={handleAddChange}
-                        />
+                      <div>{ editMode &&
+                        <fieldset>
+                          <legend>
+                            Add related links
+                          </legend>
+                          <input
+                            type="text"
+                            id="link-text"
+                            name="linkText"
+                            placeholder='Description'
+                            value={state.link.linkText}
+                            onChange={handleEnterLink}
+                          />
+                          <label htmlFor="description"> Link text</label><br />
+                          <input
+                            type="text"
+                            id="link-url"
+                            name="url"
+                            placeholder='link'
+                            value={state.link.url}
+                            onChange={handleEnterLink}
+                          />
+                          <button
+                            id="update-links"
+                            onClick={handleAddLink}
+                          >Add link</button>
+                        </fieldset>}
                       </div>
-                        : <p>{todo.description}</p>
-                      }
-                    </div>
-                    <div id="links-div" className={editingTodo}>
-                      <strong className="item-label">{todo.links && todo.links.length ? 'Links' : null}</strong>
-                      <div>{todo.links && todo.links.length && todo.links.map((link, index)=> {
-                        return (
-                          <span key={index}>
-                            {editing && <button
-                              onClick={event => removeLink(event, index)}
-                            >x</button>}
-                            <a href={link.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >{link.linkText || link.url}
-                            </a><br />
-                          </span>
-                        );
-                      }) || null}
-                      </div>
-                    </div>
-
-                    <div id="deadline">
-                      {
-                      todo.deadline? <div>
-                          <strong>Target date</strong>
-                          <div>{formatDate(todo.deadline)}</div>
-                        </div> : null
-                      }
-                      <div>
-                        <div id="edit-deadline">
-                          {editing?
-                            <button onClick={event => toggleEditModeCalendar(event, todo)}>
-                              {todo.openCalendarEditInMode? 'Close Calendar' :
-                                todo.deadline ? 'Chagne deadline' : 'Add deadline' }
-                            </button> : null }
-                        </div>
-                      </div>
-                    </div>
-
-                    { todo.openCalendarEditInMode? <Calendar timestamp={todo.deadline} getTimeStamp={setTimestamp} /> : null }
-                    <div id="check-complete">
-                    <input
-                      id={`todo-${todo.id}`}
-                      type="checkbox"
-                      checked={todo.completed}
-                      onChange={event => toggleCompleted(event, todoIndex)}
-                    />
-                    <label htmlFor={`todo-${todo.id}`}> Completed</label>
-                    </div>
-                    <div>{ editMode &&
-                      <fieldset>
-                        <legend>
-                          Add related links
-                        </legend>
-                        <input
-                          type="text"
-                          id="link-text"
-                          name="linkText"
-                          placeholder='Description'
-                          value={state.link.linkText}
-                          onChange={handleEnterLink}
-                        />
-                        <label htmlFor="description"> Link text</label><br />
-                        <input
-                          type="text"
-                          id="link-url"
-                          name="url"
-                          placeholder='link'
-                          value={state.link.url}
-                          onChange={handleEnterLink}
-                        />
-                        <button
-                          id="update-links"
-                          onClick={handleAddLink}
-                        >Add link</button>
-                      </fieldset>}
-                    </div>
-                    <button
-                      type="button"
-                      className="edit-todo main-action"
-                      id={`edit-todo-${todo.id}`}
-                      onClick={event => toggleEditMode(event, todo)}
-                    >
-                      {editing ? "Cancel" : "Edit"}
-                    </button>
-                    {editing &&
                       <button
                         type="button"
-                        className="save-todo-update main-action"
+                        className="edit-todo main-action"
                         id={`edit-todo-${todo.id}`}
-                        onClick={updateTodo}
-                      >Save</button>
-                    }
-                    <button
-                      type="button"
-                      className="delete-todo main-action"
-                      id={`edit-todo-${todo.id}`}
-                      onClick={handleDeleteTodo}
-                    >Delete</button>
-                  </div>
-                </li>
+                        onClick={event => toggleEditMode(event, todo)}
+                      >
+                        {editing ? "Cancel" : "Edit"}
+                      </button>
+                      {editing &&
+                        <button
+                          type="button"
+                          className="save-todo-update main-action"
+                          id={`edit-todo-${todo.id}`}
+                          onClick={updateTodo}
+                        >Save</button>
+                      }
+                      <button
+                        type="button"
+                        className="delete-todo main-action"
+                        id={`edit-todo-${todo.id}`}
+                        onClick={handleDeleteTodo}
+                      >Delete</button>
+                    </div>
+                  </li>
+                </div>
               </div>
-            </div>
-          )})
-        }
-        </ul>
+            )})
+          }
+          </ul>
+        </div>
       </div>
     </div>
   );

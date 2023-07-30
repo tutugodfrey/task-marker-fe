@@ -7,7 +7,7 @@ const By = base.By;
 const until = base.until;
 const { todo1 } = testTodos;
 const {
-  dashboard: elements,
+  tasks: elements,
   taskForm: fields,
   tasksContainer,
   taskExpandedCard,
@@ -15,7 +15,7 @@ const {
 
 export default {
   scanningPage: async () => {
-    await base.driver.wait(until.urlContains('/dashboard'), 15000);
+    await base.driver.wait(until.urlContains('/tasks'), 15000);
     await base.driver.wait(until.elementLocated(elements.taskFormHeader));
     await base.find(elements.homeLink).click();
     await base.find(elements.tasksLink).click();

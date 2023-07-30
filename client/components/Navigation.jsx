@@ -7,6 +7,7 @@ const {
   SIGN_UP,
   SIGN_IN,
   DASHBOARD,
+  TASKS,
   PROFILE
 } = ROUTES;
 
@@ -25,8 +26,8 @@ const Navigation = () => {
           <div id="home">
             <Link to={BASE_ROUTE}>Home</Link>
           </div>
-          <div id="dashboard">
-            <Link to={DASHBOARD}>Tasks</Link>
+          <div id="tasks">
+            <Link to={TASKS}>Tasks</Link>
           </div>
           <div id="profile">
             <Link to={PROFILE}>Profile</Link>

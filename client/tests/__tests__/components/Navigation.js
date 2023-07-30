@@ -31,9 +31,9 @@ describe('Navigation Component Test', () => {
       expect(wrapper.children().childAt(0).children().childAt(0).find('Link').props().children).toBe('Home');
       expect(wrapper.children().childAt(0).children().childAt(0).find('Link').props().to).toBe('/');
 
-      expect(wrapper.children().childAt(0).children().childAt(1).props().id).toBe('dashboard');
+      expect(wrapper.children().childAt(0).children().childAt(1).props().id).toBe('tasks');
       expect(wrapper.children().childAt(0).children().childAt(1).find('Link').props().children).toBe('Tasks');
-      expect(wrapper.children().childAt(0).children().childAt(1).find('Link').props().to).toBe('/dashboard');
+      expect(wrapper.children().childAt(0).children().childAt(1).find('Link').props().to).toBe('/tasks');
 
       expect(wrapper.children().childAt(0).children().childAt(2).props().id).toBe('profile');
       expect(wrapper.children().childAt(0).children().childAt(2).find('Link').props().children).toBe('Profile');

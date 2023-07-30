@@ -30,12 +30,12 @@ export default {
     password: By.css('div.sign-in input[name="password"]'),
     siginBtn: By.css('#submitLogin'),
   },
-  dashboard: {
+  tasks: {
     navBar: By.css('#nav-bar'),
     homeLink: By.css('#home a'),
     profileLink: By.css('#profile a'),
     logoutLink: By.css('#logout a'),
-    tasksLink: By.css('#dashboard a'),
+    tasksLink: By.css('#tasks a'),
     taskFormHeader: By.css('div#todo-form_container h3'),
     taskContentHeader: By.css('div#todos-content_div h3'),
   },

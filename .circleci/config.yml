@@ -21,6 +21,7 @@ jobs:
           name: Get bakcend service endpoint
           command: |
             BACKEND_SERVICE_ENDPOINT=${BACKEND_SERVICE}
+            API_URL=http://${API_URL_DEV}:32691/api
             ENVIRONMENT=dev
             if [[ $CIRCLE_BRANCH == master ]]; then
               BACKEND_SERVICE_ENDPOINT=${BACKEND_SERVICE_PROD}
@@ -39,6 +40,7 @@ jobs:
 
             echo BACKEND_SERVICE_ENDPOINT=${BACKEND_SERVICE_ENDPOINT} >> ~/.env;
             echo ENVIRONMENT=${ENVIRONMENT} >> ~/.env;
+            echo API_URL=${API_URL} >> ~/.env
 
       - run:
           name: Check env vars
@@ -107,9 +109,10 @@ jobs:
           name: Build docker image, tag with circleci build num
           command: |
             export "$(grep ENVIRONMENT ~/.env)"
+            export "$(grep API_URL ~/.env)"
             echo $DOCKER_HUB_PASS | docker login -u $DOCKER_USER --password-stdin
             . ./docker-helper.sh
-            build_image_fe http://api.taskmarker.com:32691/api  ${ENVIRONMENT}-${CIRCLE_BUILD_NUM}
+            build_image_fe ${API_URL}  ${ENVIRONMENT}-${CIRCLE_BUILD_NUM}
             push_image ${ENVIRONMENT}-${CIRCLE_BUILD_NUM}
 
 workflows:

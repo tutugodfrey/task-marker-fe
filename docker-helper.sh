@@ -49,6 +49,7 @@ function build_image_fe() {
     IMAGE_NAME_FE=$3
   fi
 
+  echo $API_URL
   command="docker build  -t $IMAGE_NAME_FE:$TAG --build-arg API_URL=$API_URL  .";
   echo Executing: $command;
   $command

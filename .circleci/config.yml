@@ -60,7 +60,7 @@ jobs:
       - checkout
 
       - restore_cache:
-          keys: [build-cache4]
+          keys: [build-cache5]
 
       - run:
           name: install_dependencies
@@ -74,7 +74,7 @@ jobs:
 
       - save_cache:
           paths: [./]
-          key: build-cache4
+          key: build-cache5
       
   test:
     <<: *default_image
@@ -82,7 +82,7 @@ jobs:
       - checkout
 
       - restore_cache:
-          keys: [build-cache4]
+          keys: [build-cache5]
 
       - run:
           name: Run test
@@ -114,7 +114,7 @@ jobs:
             export "$(grep API_URL ~/.env)"
             echo $DOCKER_HUB_PASS | docker login -u $DOCKER_USER --password-stdin
             . ./docker-helper.sh
-            build_image_fe $API_URL  ${ENVIRONMENT}-${CIRCLE_BUILD_NUM}
+            build_image_fe http://${API_URL_DEV}:32691/api ${ENVIRONMENT}-${CIRCLE_BUILD_NUM}
             push_image ${ENVIRONMENT}-${CIRCLE_BUILD_NUM}
 
 workflows:

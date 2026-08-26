@@ -23,7 +23,7 @@ export default () => {
     output: {
       path: path.join(__dirname, 'public'),
       filename: 'bundle.js',
-      publicPath: 'public',
+      publicPath: '/',
     },
     module: {
       rules: [
@@ -39,7 +39,7 @@ export default () => {
             {
             loader: 'css-loader',
             options: {
-              url: false,
+              url: true,
               },
             },
             {

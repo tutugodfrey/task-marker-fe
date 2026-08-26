@@ -17,6 +17,7 @@ export default () => {
   return {
     devtool: 'inline-source-map',
     entry: './client/index.js',
+    mode: 'production',
     node: {
       __dirname: true
     },
